@@ -1,41 +1,85 @@
-# 🔐 Security Research Notes
+# 🔐 crush-security-lab
 
-مستندات و گزارش‌های شخصی من از یادگیری وب سکیوریتی و باگ‌بانتی.
+[![Security Research](https://img.shields.io/badge/Security-Research-red.svg)]()
+[![OWASP](https://img.shields.io/badge/OWASP-Top%2010-orange.svg)]()
+[![PortSwigger](https://img.shields.io/badge/PortSwigger-Academy-ff6633.svg)]()
+[![Made with ❤️ by crush](https://img.shields.io/badge/Made%20with%20%E2%9D%A4%EF%B8%8F%20by-crush-blue.svg)]()
 
-این ریپو بیشتر جنبه‌ی یادگیری دارد تا گزارش رسمی و بیشتر برای مستندسازی روند کار هست.
-
-⚠️ **Disclaimer**
-
-> تمام تست‌ها و تحلیل‌های این مستندات روی محیط آزمایشگاهی محلی (Kali Linux, VMware) و اپلیکیشن عمداً آسیب‌پذیر [OWASP Juice Shop](https://github.com/juice-shop/juice-shop) انجام شده‌اند.
-هیچ سیستم واقعی یا متعلق به شخص ثالث تست نشده است. 
-این محتوا صرفاً برای یادگیری و مستندسازی شخصی تهیه شده است.
+> **My personal security lab for learning, documenting, and sharing Web Application Security findings**
 
 ---
 
-## 📑 فهرست گزارش‌ها
+## 👋 About Me
 
-| گزارش | توضیح |
-|---|---|
-| [🛡️ یافته‌های تست امنیتی — Juice Shop](https://maryla200.github.io/juice-shop-security-research/security-test-findings.html) | مستندسازی کامل ۸ تست دستی روی Juice Shop: CSRF، Information Disclosure، IDOR، Clickjacking، Directory Traversal و بای‌پس کامل احراز هویت با JWT Algorithm None |
-| [⚡ SQL Injection](https://maryla200.github.io/juice-shop-security-research/sql-injection.html) | دور زدن لاگین ادمین و استخراج/کرک هش پسورد از طریق SQL Injection |
-| [🔑 JWT Deep Dive](https://maryla200.github.io/juice-shop-security-research/jwt_deep_dive.html) | بررسی عمیق ساختار JWT، رمزگشایی Payload و تست عملی روی توکن‌ها |
-| [📟 TOTP Secret](https://maryla200.github.io/juice-shop-security-research/totp-secret-explained.html) | مفهوم و کاربرد TOTP Secret در احراز هویت دومرحله‌ای |
-| [🔓 Password Hash Cracking](https://maryla200.github.io/juice-shop-security-research/password-hash-cracking.html) | مفاهیم هش پسورد و روش‌های کرک آن با hashcat |
-| [🍪 XSS Session Hijacking](https://maryla200.github.io/juice-shop-security-research/xss_session_hijacking.html) | سناریوی عملی دزدیدن نشست کاربر از طریق تزریق XSS و سرقت کوکی‌های جلسه |
-| [📋 Full penetration test report](https://maryla200.github.io/juice-shop-security-research/full-penetration-test-report.html) | گزارش کامل تست نفوذ با هدف دسترسی غیرمجاز به حساب کاربر Bender با استفاده از SQL Injection - Authentication Bypass (✅ موفق) |
-| [⚙️ Hashcat Errors Report](https://maryla200.github.io/juice-shop-security-research/hashcat-errors-report.html) | خطاها و راه‌حل‌های عملی هنگام کار با ابزار hashcat |
-| [🌐 HTTP & URL Reference](https://maryla200.github.io/juice-shop-security-research/http%26url.html) | مرجع مفاهیم HTTP و ساختار URL |
-| [📦 Juice Shop Findings (Public)](https://maryla200.github.io/juice-shop-security-research/juice_shop_findings_public.html) | نسخه‌ی خلاصه‌شده‌ی یافته‌های تست روی Juice Shop |
-| [🧩 APT Lock Challenge](https://maryla200.github.io/juice-shop-security-research/apt-lock-challenge.html) | عیب‌یابی و حل چالش قفل شدن APT در محیط Kali |
-| [🖥️ Kali Disk Expansion Guide](https://maryla200.github.io/juice-shop-security-research/kali_disk_expansion_guide.html) | راهنمای افزایش فضای دیسک ماشین مجازی کالی لینوکس |
-| [💽 VMware Disk Lock Troubleshooting](https://maryla200.github.io/juice-shop-security-research/vmware-disk-lock-troubleshooting.html) | عیب‌یابی و رفع خطای قفل شدن دیسک در VMware |
+**crush** | Bug Hunter in Training 🐛
+
+Passionate about web security, with a focus on **XSS** and **Web App Penetration Testing**. Learning and improving daily in the field of bug bounty hunting.
+
+### 🎯 My Goals
+- [ ] Complete **PortSwigger Web Security Academy** courses
+- [ ] Document **OWASP Juice Shop** findings professionally
+- [ ] Participate in Bug Bounty programs
+- [ ] Earn my first Hall of Fame 🏆
 
 ---
 
-## 🎯 هدف
+## 📊 My Learning Path
 
-یادداشت‌برداری شخصی در مسیر یادگیری pentesting و باگ‌بانتی — شامل تحلیل آسیب‌پذیری‌های وب (OWASP Top 10)، عیب‌یابی محیط آزمایشگاهی (Kali / VMware)، و تمرین عملی روی پلتفرم‌های آموزشی مثل OWASP Juice Shop می باشد.
+### Currently Working On 🟢
+- **PortSwigger Academy** - Starting with XSS module
+- **OWASP Juice Shop** - Testing and documenting vulnerabilities
 
-## 🧰 ابزارهای استفاده‌شده
+### Upcoming 🔵
+- **PortSwigger** - SQL Injection, CSRF, SSRF
+- **HackTheBox** - Starting Point Machines
+- **TryHackMe** - Web Fundamentals Path
 
-`Burp Suite` · `DevTools` · `hashcat` · `sqlmap concepts` · `jwt.io` · `crackstation` · `Kali Linux` · `VMware Workstation`
+---
+
+## 🚀 Skills
+
+| Area | Level | Tools |
+|------|-------|-------|
+| Web Application Security | 🔴 Learning | Burp Suite, OWASP ZAP |
+| XSS (Cross-Site Scripting) | 🟡 Intermediate | Browser DevTools |
+| Python | 🟡 Intermediate | Requests, BeautifulSoup |
+| JavaScript | 🟡 Intermediate | Node.js, DOM |
+| C | 🔴 Beginner | GCC |
+| Docker | 🟢 Familiar | Docker, Docker Compose |
+
+
+---
+
+## 🔥 Recent Findings
+
+| Date | Vulnerability | Severity | Source | Status |
+|------|---------------|----------|--------|--------|
+| 2025-XX-XX | Stored XSS in Search Bar | 🟠 High | Juice Shop | ✅ Documented |
+| 2025-XX-XX | Reflected XSS | 🟡 Medium | PortSwigger Lab | ✅ Solved |
+
+---
+
+## 🛠️ Testing Environment
+
+- **OS:** Kali Linux
+- **Containerization:** Docker
+- **Targets:** OWASP Juice Shop, PortSwigger Labs
+- **Tools:** Burp Suite Community, OWASP ZAP, Custom Scripts
+
+---
+
+## 📚 Learning Resources
+
+### Training
+- [PortSwigger Web Security Academy](https://portswigger.net/web-security) - 🎯 Primary focus
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [HackerOne Hacktivity](https://hackerone.com/hacktivity) - Learning from real-world reports
+
+---
+
+## 📫 Connect With Me
+[![GitHub](https://img.shields.io/badge/GitHub-crush-181717.svg)](https://github.com/Maryla200)
+
+
+
+## 📁 Repository Structure
