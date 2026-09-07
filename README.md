@@ -3,7 +3,6 @@
 [![Security Research](https://img.shields.io/badge/Security-Research-red.svg)]()
 [![Web Security](https://img.shields.io/badge/Web-Security-orange.svg)]()
 [![OWASP](https://img.shields.io/badge/OWASP-Top%2010-black.svg)]()
-[![GitHub](https://img.shields.io/badge/GitHub-CRUSH-HUNTER-181717.svg)](https://github.com/CRUSH-HUNTER)
 
 > A personal cybersecurity lab focused on hands-on Web Application Security research, vulnerability analysis, and security testing.
 
