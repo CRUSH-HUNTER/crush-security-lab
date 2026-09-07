@@ -190,7 +190,7 @@ The techniques documented here are provided for **educational, defensive, and au
 
 ## 📫 Connect
 
-**GitHub:** [Maryla200](https://github.com/CRUSH-HUNTER)
+**GitHub:** [CRUSH-HUNTER](https://github.com/CRUSH-HUNTER)
 
 ---
 
