@@ -37,17 +37,6 @@ My hands-on security testing and vulnerability documentation for [OWASP Juice Sh
 
 ---
 
-## 📊 Progress Tracker
-
-| Category | Started | Completed | Reports |
-|----------|---------|-----------|---------|
-| XSS | ✅ | 🔄 | [View](reports/) |
-| SQLi | ❌ | ❌ | - |
-| Auth Bypass | ❌ | ❌ | - |
-| IDOR | ❌ | ❌ | - |
-
----
-
 ## 🔗 Resources
 
 - [Juice Shop Official Page](https://owasp.org/www-project-juice-shop/)
