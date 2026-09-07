@@ -21,8 +21,8 @@
 | [🔑 JWT Deep Dive](https://maryla200.github.io/juice-shop-security-research/jwt_deep_dive.html) | بررسی عمیق ساختار JWT، رمزگشایی Payload و تست عملی روی توکن‌ها |
 | [📟 TOTP Secret](https://maryla200.github.io/juice-shop-security-research/totp-secret-explained.html) | مفهوم و کاربرد TOTP Secret در احراز هویت دومرحله‌ای |
 | [🔓 Password Hash Cracking](https://maryla200.github.io/juice-shop-security-research/password-hash-cracking.html) | مفاهیم هش پسورد و روش‌های کرک آن با hashcat |
-| [🍪 XSS Session Hijacking](https://maryla200.github.io/juice-shop-security-research/blob/main/xss_session_hijacking.html) | سناریوی عملی دزدیدن نشست کاربر از طریق تزریق XSS و سرقت کوکی‌های جلسه |
-| [📋 Full penetration test report](https://maryla200.github.io/juice-shop-security-research/blob/main/full-penetration-test-report.html) | گزارش کامل تست نفوذ با هدف دسترسی غیرمجاز به حساب کاربر Bender با استفاده از SQL Injection - Authentication Bypass (✅ موفق) |
+| [🍪 XSS Session Hijacking](https://maryla200.github.io/juice-shop-security-research/xss_session_hijacking.html) | سناریوی عملی دزدیدن نشست کاربر از طریق تزریق XSS و سرقت کوکی‌های جلسه |
+| [📋 Full penetration test report](https://maryla200.github.io/juice-shop-security-research/full-penetration-test-report.html) | گزارش کامل تست نفوذ با هدف دسترسی غیرمجاز به حساب کاربر Bender با استفاده از SQL Injection - Authentication Bypass (✅ موفق) |
 | [⚙️ Hashcat Errors Report](https://maryla200.github.io/juice-shop-security-research/hashcat-errors-report.html) | خطاها و راه‌حل‌های عملی هنگام کار با ابزار hashcat |
 | [🌐 HTTP & URL Reference](https://maryla200.github.io/juice-shop-security-research/http%26url.html) | مرجع مفاهیم HTTP و ساختار URL |
 | [📦 Juice Shop Findings (Public)](https://maryla200.github.io/juice-shop-security-research/juice_shop_findings_public.html) | نسخه‌ی خلاصه‌شده‌ی یافته‌های تست روی Juice Shop |
