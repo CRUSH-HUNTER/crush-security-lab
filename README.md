@@ -135,37 +135,6 @@ The goal is not simply to reproduce a vulnerability, but to understand **why it 
 
 ---
 
-## 📁 Repository Structure
-
-```text
-crush-security-lab/
-│
-├── README.md
-│
-├── web-security/
-│   ├── xss/
-│   ├── sqli/
-│   ├── authentication/
-│   ├── authorization/
-│   └── jwt/
-│
-├── labs/
-│   ├── juice-shop/
-│   ├── kali/
-│   └── docker/
-│
-├── notes/
-│   ├── http/
-│   ├── cookies/
-│   ├── sessions/
-│   └── web-fundamentals/
-│
-└── scripts/
-    └── security-tools/
-```
-
----
-
 ## ⚠️ Ethical Use & Disclaimer
 
 All security testing documented in this repository is performed against intentionally vulnerable applications, local laboratory environments, or systems for which testing is explicitly authorized.
