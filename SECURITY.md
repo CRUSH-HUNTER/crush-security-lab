@@ -6,7 +6,7 @@ If you discover a security vulnerability in this repository, please report it re
 
 ### How to Report
 
-- **Email:** maryammovahed799@gmail.com
+- **Email:** mformetanoiawhitehathacker@gmail.com
 
 
 ### Guidelines
