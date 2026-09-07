@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>راهنمای افزایش فضای دیسک Kali</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg: #0b0d10;
+  --bg-panel: #12151a;
+  --line: #262b33;
+  --text: #d7dbe0;
+  --text-dim: #838d99;
+  --red: #ff4d4f;
+  --red-dim: #7a2426;
+  --green: #3fd68a;
+  --blue: #5aa9ff;
+  --amber: #ffb454;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg); scroll-behavior:smooth;}
+body{
+  font-family:'Vazirmatn', sans-serif;
+  color:var(--text);
+  line-height:1.9;
+  padding:0 0 80px 0;
+}
+.mono{font-family:'JetBrains Mono', monospace; direction:ltr; unicode-bidi:isolate;}
+
+.hero{
+  padding:56px 24px 36px;
+  max-width:920px;
+  margin:0 auto;
+  border-bottom:1px solid var(--line);
+  position:relative;
+}
+.hero-tag{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  display:inline-block;
+  color:var(--red);
+  font-size:13px;
+  letter-spacing:1px;
+  border:1px solid var(--red-dim);
+  background:rgba(255,77,79,0.06);
+  padding:4px 10px;
+  border-radius:4px;
+  margin-bottom:16px;
+}
+.hero h1{
+  font-size:30px;
+  font-weight:800;
+  margin:0 0 10px;
+  color:#fff;
+}
+.hero p{
+  color:var(--text-dim);
+  font-size:15.5px;
+  max-width:680px;
+  margin:0;
+}
+
+/* summary chips */
+.summary{
+  max-width:920px;
+  margin:20px auto 0;
+  padding:0 24px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.chip{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  font-size:12px;
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  padding:6px 12px;
+  border-radius:20px;
+  color:var(--text-dim);
+}
+.chip b{ color:var(--green); }
+
+main{
+  max-width:920px;
+  margin:0 auto;
+  padding:0 24px;
+}
+
+.stage{ margin-top:52px; scroll-margin-top:20px; }
+
+.stage-head{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+.stage-num{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  background:rgba(255,77,79,0.1);
+  border:1px solid var(--red-dim);
+  color:var(--red);
+  font-weight:800;
+  font-size:15px;
+  width:34px; height:34px;
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.stage-head h2{
+  font-size:19px;
+  font-weight:700;
+  color:#fff;
+  margin:0;
+}
+.stage-head span.en{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  color:var(--text-dim);
+  font-size:13px;
+  display:block;
+  margin-top:2px;
+}
+
+.step{
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:18px 20px;
+  margin-bottom:14px;
+  position:relative;
+  padding-right:52px;
+}
+.step-index{
+  position:absolute;
+  right:16px; top:18px;
+  font-family:'JetBrains Mono', monospace;
+  color:var(--text-dim);
+  font-size:12px;
+  border:1px solid var(--line);
+  width:24px; height:24px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+}
+.step h3{
+  margin:0 0 8px;
+  font-size:15.5px;
+  color:#fff;
+  font-weight:700;
+}
+.step p{ margin:6px 0 0; font-size:15px; }
+
+pre{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  unicode-bidi:isolate;
+  background:#0a0c0f;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:12px 14px;
+  overflow-x:auto;
+  font-size:13.5px;
+  color:#c9f5d8;
+  margin:10px 0 0;
+  line-height:1.7;
+}
+code.inline{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+  unicode-bidi:isolate;
+  background:rgba(255,255,255,0.06);
+  padding:1px 6px;
+  border-radius:4px;
+  font-size:0.92em;
+}
+
+.warn{
+  background:linear-gradient(135deg, rgba(255,180,84,0.12), rgba(255,180,84,0.02));
+  border:1px solid rgba(255,180,84,0.35);
+  border-radius:8px;
+  padding:12px 16px;
+  margin-top:12px;
+  font-size:14px;
+  color:#ffdca8;
+}
+.warn b{ color:var(--amber); }
+
+.info{
+  background:linear-gradient(135deg, rgba(90,169,255,0.10), rgba(90,169,255,0.02));
+  border:1px solid rgba(90,169,255,0.3);
+  border-radius:8px;
+  padding:12px 16px;
+  margin-top:12px;
+  font-size:14px;
+  color:#cfe6ff;
+}
+
+.result{
+  background:linear-gradient(135deg, rgba(63,214,138,0.10), rgba(63,214,138,0.02));
+  border:1px solid rgba(63,214,138,0.3);
+  border-radius:8px;
+  padding:12px 16px;
+  margin-top:12px;
+  font-size:14px;
+  color:#c7f5da;
+}
+.result b{ color:var(--green); }
+
+.divider{
+  border:none;
+  border-top:1px dashed var(--line);
+  margin:52px 0 0;
+}
+
+table.diag{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:14px;
+}
+table.diag th, table.diag td{
+  text-align:right;
+  padding:8px 10px;
+  border-bottom:1px solid var(--line);
+}
+table.diag th{
+  color:var(--text-dim);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+table.diag td.mono{
+  font-family:'JetBrains Mono', monospace;
+  direction:ltr;
+}
+
+footer{
+  max-width:920px;
+  margin:60px auto 0;
+  padding:20px 24px 0;
+  border-top:1px solid var(--line);
+  color:var(--text-dim);
+  font-size:13px;
+  text-align:center;
+}
+
+@media (max-width:600px){
+  .hero h1{font-size:24px;}
+  .step{padding-right:44px;}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-tag">// KALI VM · DISK EXPANSION LOG</span>
+  <h1>راهنمای افزایش فضای دیسک Kali Linux</h1>
+  <p>مستندسازی کامل فرایند تشخیص و رفع کمبود فضای دیسک روی VMware Workstation — از عیب‌یابی اولیه تا گسترش نهایی پارتیشن با GParted Live.</p>
+</div>
+
+<div class="summary">
+  <span class="chip">قبل: <b>sda 20G</b></span>
+  <span class="chip">بعد: <b>sda 50G</b></span>
+  <span class="chip">ابزار: <b class="mono" style="direction:ltr">GParted Live</b></span>
+  <span class="chip">هایپروایزر: <b class="mono" style="direction:ltr">VMware Workstation</b></span>
+</div>
+
+<main>
+
+<section class="stage" id="diagnosis">
+  <div class="stage-head">
+    <div class="stage-num">1</div>
+    <div><h2>تشخیص مشکل</h2><span class="en">Diagnosis</span></div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">1</div>
+    <h3>بررسی وضعیت اولیه دیسک و RAM</h3>
+    <p>با <code class="inline">lsblk -f</code> و <code class="inline">df -h</code> مشخص شد که <code class="inline">sda1</code> (روت سیستم) از ۱۹ گیگ ظرفیت، ۱۵ گیگ پر شده بود؛ درحالی‌که یک دیسک دوم (<code class="inline">sdb</code>) به‌تازگی اضافه شده بود اما به‌عنوان دیسک کاملاً جدا شناسایی می‌شد، نه بخشی از <code class="inline">sda</code>.</p>
+    <pre>lsblk -f
+df -h</pre>
+    <div class="info">نکته: وقتی یک دیسک جدید به ماشین مجازی اضافه می‌شود، هایپروایزر آن را همیشه به‌صورت یک دیسک مستقل (مثلاً <code class="inline">/dev/sdb</code>) می‌شناسد، نه اینکه خودکار به پارتیشن اصلی بچسباند.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">2</div>
+    <h3>پیدا کردن بزرگ‌ترین مصرف‌کننده‌ی فضا</h3>
+    <p>با نصب و اجرای <code class="inline">ncdu</code> و دستورات <code class="inline">du -sh</code> روی مسیرهای مشکوک، مشخص شد اصلی‌ترین مصرف‌کننده‌ی فضا، پوشه‌ی <code class="inline">/usr</code> (حدود ۱۳ گیگ) بود — شامل ابزارهای امنیتی نصب‌شده روی Kali مثل Burp Suite، exploitdb، john، peass و کتابخانه‌های سیستمی (python3، llvm، gcc).</p>
+    <pre>sudo apt install ncdu -y
+sudo ncdu /
+sudo du -sh /usr /var/log /opt
+sudo du -h --max-depth=1 /usr/lib | sort -rh | head -15</pre>
+    <div class="result"><b>نتیجه‌گیری:</b> این حجم واقعی و در حال استفاده بود، نه فایل زباله. تصمیم نهایی: به‌جای پاک‌سازی، ظرفیت خود دیسک <code class="inline">sda</code> باید افزایش می‌یافت.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="stage" id="migration">
+  <div class="stage-head">
+    <div class="stage-num">2</div>
+    <div><h2>مهاجرت داده‌ی Docker به دیسک دوم</h2><span class="en">Migrating Docker to sdb</span></div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">1</div>
+    <h3>آماده‌سازی و مانت کردن دیسک دوم</h3>
+    <p>دیسک خام <code class="inline">sdb</code> پارتیشن‌بندی، فرمت و روی مسیر <code class="inline">/mnt/data</code> مانت شد.</p>
+    <pre>sudo fdisk /dev/sdb        # n → p → Enter → Enter → w
+sudo partprobe /dev/sdb
+sudo mkfs.ext4 /dev/sdb1
+sudo mkdir -p /mnt/data
+sudo mount /dev/sdb1 /mnt/data</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">2</div>
+    <h3>ماندگار کردن مانت با fstab</h3>
+    <pre>sudo blkid /dev/sdb1
+sudo nano /etc/fstab
+# افزودن خط:
+# UUID=xxxx-xxxx  /mnt/data  ext4  defaults  0  2</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">3</div>
+    <h3>انتقال داده‌ی Docker</h3>
+    <p>سرویس Docker متوقف شد، داده‌ها با <code class="inline">rsync</code> به مسیر جدید کپی شدند، و در <code class="inline">daemon.json</code> مسیر ذخیره‌سازی جدید معرفی شد.</p>
+    <pre>sudo systemctl stop docker
+sudo systemctl stop docker.socket
+sudo mkdir -p /mnt/data/docker
+sudo rsync -aP /var/lib/docker/ /mnt/data/docker/
+
+sudo nano /etc/docker/daemon.json
+# { "data-root": "/mnt/data/docker" }
+
+sudo systemctl start docker
+docker info | grep "Docker Root Dir"
+sudo rm -rf /var/lib/docker</pre>
+    <div class="result"><b>نتیجه:</b> فضای اشغال‌شده توسط Docker از <code class="inline">sda</code> جدا شد، اما بررسی‌های بعدی نشان داد مشکل اصلی جای دیگری (پوشه‌ی <code class="inline">/usr</code>) بود، نه Docker.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="stage" id="vmware-expand">
+  <div class="stage-head">
+    <div class="stage-num">3</div>
+    <div><h2>افزایش ظرفیت دیسک از VMware</h2><span class="en">Expanding the Virtual Disk</span></div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">1</div>
+    <h3>خاموش کردن کامل ماشین مجازی</h3>
+    <p>گسترش دیسک فقط وقتی ممکن است که VM کاملاً خاموش باشد (نه Suspend).</p>
+    <pre>sudo poweroff</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">2</div>
+    <h3>حذف اسنپ‌شات‌های موجود</h3>
+    <p>دکمه‌ی Expand در VMware تا وقتی اسنپ‌شات وجود داشته باشد غیرفعال می‌ماند.</p>
+    <pre>VM → Snapshot → Snapshot Manager → Delete All</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">3</div>
+    <h3>گسترش دیسک از تنظیمات VM</h3>
+    <pre>VM → Settings → Hard Disk (SCSI) → Expand...
+# اندازه‌ی جدید وارد شد: از 20GB به 50GB</pre>
+    <div class="warn"><b>هشدار:</b> این مرحله فقط فضای خام دیسک را در سطح هایپروایزر افزایش می‌دهد. پارتیشن و فایل‌سیستم داخل Kali هنوز از این فضای اضافه خبر ندارند — مرحله‌ی بعدی برای همین لازم است.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="stage" id="gparted-boot">
+  <div class="stage-head">
+    <div class="stage-num">4</div>
+    <div><h2>بوت از GParted Live</h2><span class="en">Booting GParted Live ISO</span></div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">1</div>
+    <h3>چرا از GParted Live استفاده کردیم؟</h3>
+    <p>پارتیشن روت (<code class="inline">sda1</code>) در حالت عادی مانت و در حال اجراست، پس نمی‌توان آن را از داخل خود سیستم به‌صورت امن گسترش داد. GParted Live یک سیستم‌عامل کوچک است که از روی ISO بوت می‌شود و پارتیشن‌بندی را از بیرون سیستم اصلی انجام می‌دهد.</p>
+  </div>
+
+  <div class="step">
+    <div class="step-index">2</div>
+    <h3>وصل کردن فایل ISO</h3>
+    <pre>VM → Settings → CD/DVD (IDE)
+→ Use ISO image file → مسیر فایل gparted-live.iso
+→ تیک Connect at power on</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">3</div>
+    <h3>ورود به فریمور برای تغییر ترتیب بوت</h3>
+    <p>چون فشردن Esc در لحظه‌ی روشن‌شدن همیشه قابل‌اعتماد نیست، از مسیر مطمئن‌تر زیر استفاده شد:</p>
+    <pre>VM → Power → Power On to Firmware</pre>
+    <p>در محیط PhoenixBIOS، از تب <code class="inline">Boot</code>، گزینه‌ی <code class="inline">CD-ROM Drive</code> با کلید <code class="inline">+</code> بالای <code class="inline">Hard Drive</code> آورده شد، سپس <code class="inline">F10</code> برای ذخیره و خروج زده شد.</p>
+    <div class="result">نتیجه: سیستم با موفقیت وارد محیط گرافیکی GParted شد و /dev/sda (50 گیگ) با پارتیشن‌های sda1 (18.92G)، sda2/sda5 (extended/swap، 1.08G) و 30G فضای unallocated نمایش داده شد.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="stage" id="repartition">
+  <div class="stage-head">
+    <div class="stage-num">5</div>
+    <div><h2>بازآرایی پارتیشن‌ها در GParted</h2><span class="en">Repartitioning</span></div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">1</div>
+    <h3>حذف پارتیشن Swap و Extended</h3>
+    <p>چون پارتیشن روت قبل از پارتیشن extended/swap قرار داشت، نمی‌شد مستقیم آن را گسترش داد. اول باید موانع کنار زده می‌شدند.</p>
+    <pre>راست‌کلیک روی /dev/sda5 (linux-swap) → Delete
+راست‌کلیک روی /dev/sda2 (extended) → Delete</pre>
+    <div class="result">نتیجه: کل فضای بعد از sda1 (حدود 31 گیگ) به‌صورت یکپارچه unallocated شد.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">2</div>
+    <h3>گسترش پارتیشن روت (sda1)</h3>
+    <p>با ۲ گیگ فاصله برای ساخت swap جدید در انتها.</p>
+    <pre>راست‌کلیک روی /dev/sda1 → Resize/Move
+→ New size: تا 48.00 GiB (2 GiB برای swap باقی گذاشته شد)</pre>
+    <div class="warn"><b>نکته:</b> این مرحله برخلاف حذف پارتیشن، واقعاً فایل‌سیستم ext4 را گسترش می‌دهد و چند دقیقه طول می‌کشد.</div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">3</div>
+    <h3>ساخت پارتیشن Swap جدید</h3>
+    <pre>راست‌کلیک روی فضای unallocated باقی‌مانده → New
+→ File system: linux-swap
+→ Add</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">4</div>
+    <h3>اعمال نهایی تغییرات</h3>
+    <p>بعد از تایید صف عملیات (حذف swap قدیمی، گسترش sda1 به 48G، ساخت swap جدید 2G)، دکمه‌ی تیک سبز Apply زده شد.</p>
+    <pre>دکمه‌ی Apply (تیک سبز) در نوار ابزار GParted</pre>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="stage" id="post-boot">
+  <div class="stage-head">
+    <div class="stage-num">6</div>
+    <div><h2>بازگشت به Kali و نهایی‌سازی</h2><span class="en">Post-Reboot Cleanup</span></div>
+  </div>
+
+  <div class="step">
+    <div class="step-index">1</div>
+    <h3>خروج از GParted و قطع اتصال ISO</h3>
+    <p>قبل از ری‌استارت، اتصال ISO باید قطع شود تا سیستم دوباره وارد GParted نشود و به‌جایش بوت عادی Kali انجام شود.</p>
+    <pre>GParted → Quit → Reboot
+VM → Settings → CD/DVD (IDE) → برداشتن تیک Connect at power on</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">2</div>
+    <h3>پیدا کردن UUID پارتیشن Swap جدید</h3>
+    <p>چون یک پارتیشن swap کاملاً جدید ساخته شده، UUID آن با چیزی که در fstab قدیمی ثبت بود فرق دارد.</p>
+    <pre>lsblk -f
+sudo blkid | grep swap</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">3</div>
+    <h3>به‌روزرسانی /etc/fstab</h3>
+    <pre>sudo nano /etc/fstab
+# جایگزینی UUID قدیمی خط swap با UUID جدید</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-index">4</div>
+    <h3>فعال‌سازی و تایید نهایی</h3>
+    <pre>sudo swapon -a
+free -h</pre>
+    <div class="result"><b>معیار موفقیت:</b> اگر مقدار Swap در خروجی <code class="inline">free -h</code> غیر صفر باشد، یعنی سیستم با فضای گسترش‌یافته‌ی جدید (sda1 = 48G، swap = 2G) کاملاً سالم و آماده به کار است.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="stage" id="before-after">
+  <div class="stage-head">
+    <div class="stage-num">7</div>
+    <div><h2>مقایسه‌ی قبل و بعد</h2><span class="en">Before / After</span></div>
+  </div>
+
+  <table class="diag">
+    <tr><th>بخش</th><th>قبل</th><th>بعد</th></tr>
+    <tr><td>sda (دیسک اصلی)</td><td class="mono">20 GiB</td><td class="mono">50 GiB</td></tr>
+    <tr><td>sda1 (روت /)</td><td class="mono">18.92 GiB</td><td class="mono">48.00 GiB</td></tr>
+    <tr><td>swap</td><td class="mono">1.08 GiB (sda5)</td><td class="mono">2.00 GiB (پارتیشن جدید)</td></tr>
+    <tr><td>Docker data-root</td><td class="mono">/var/lib/docker (روی sda)</td><td class="mono">/mnt/data/docker (روی sdb)</td></tr>
+  </table>
+</section>
+
+</main>
+
+<footer>
+  یادداشت شخصی از فرایند افزایش فضای دیسک Kali Linux روی VMware Workstation
+</footer>
+
+</body>
+</html>

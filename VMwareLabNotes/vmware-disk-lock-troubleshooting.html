@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گزارش خطا و عیب‌یابی - ماشین مجازی کالی لینوکس</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 850px;
+            width: 100%;
+            background: #161b22;
+            padding: 40px 45px;
+            border-radius: 20px;
+            border: 1px solid #30363d;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #f0883e;
+            border-right: 5px solid #f0883e;
+            padding-right: 15px;
+            margin-bottom: 25px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #21262d;
+            color: #58a6ff;
+            font-size: 13px;
+            padding: 4px 14px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            border: 1px solid #30363d;
+        }
+
+        .section {
+            margin-top: 30px;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 25px;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #f0e6d0;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 .emoji {
+            font-size: 24px;
+        }
+
+        p, li {
+            line-height: 1.9;
+            color: #c9d1d9;
+            font-size: 15px;
+        }
+
+        ul {
+            padding-right: 25px;
+            margin-top: 8px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .code-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 12px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #f0883e;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .code-box span {
+            color: #8b949e;
+        }
+
+        .success {
+            background: #0f2d1f;
+            border-right: 5px solid #2ea043;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 18px 0;
+        }
+
+        .success strong {
+            color: #3fb950;
+        }
+
+        .warning {
+            background: #2d1f0f;
+            border-right: 5px solid #d29922;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 18px 0;
+        }
+
+        .warning strong {
+            color: #e3b341;
+        }
+
+        .step {
+            display: flex;
+            gap: 14px;
+            margin-top: 18px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            background: #21262d;
+            color: #58a6ff;
+            font-weight: bold;
+            min-width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            border: 1px solid #30363d;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content p {
+            margin: 0;
+        }
+
+        .footer {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #21262d;
+            text-align: center;
+            font-size: 14px;
+            color: #8b949e;
+        }
+
+        .footer strong {
+            color: #f0883e;
+        }
+
+        @media (max-width: 550px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <span class="badge">📅 تاریخ: ۲۵ مرداد ۱۴۰۵</span>
+    <span class="badge" style="margin-right:10px;">🕒 زمان: ۱۴:۳۰</span>
+
+    <h1>🔧 گزارش عیب‌یابی: خطای قفل شدن دیسک در VMware</h1>
+
+    <!-- بخش ۱: شرح مشکل -->
+    <div class="section">
+        <h2><span class="emoji">⚠️</span> ۱. شرح مشکل</h2>
+        <p>
+            هنگام تلاش برای روشن کردن ماشین مجازی <strong>کالی لینوکس</strong> در <strong>VMware Workstation</strong>، 
+            با پیام خطای زیر مواجه شدم:
+        </p>
+        <div class="code-box">
+The process cannot access the file because another process has locked a portion of the file
+
+Cannot open the disk 'D:\Kalilinux\Debian 10.x-1-000001.vmdk' or one of the snapshot disks it depends on.
+
+Module 'Disk' power on failed.
+        </div>
+        <p>
+            ماشین مجازی اصلاً استارت نمی‌خورد و این ارور مانع از ادامه‌ی کار می‌شد.
+        </p>
+    </div>
+
+    <!-- بخش ۲: تحلیل علت -->
+    <div class="section">
+        <h2><span class="emoji">🔍</span> ۲. تحلیل علت</h2>
+        <p>
+            این خطا معمولاً به یکی از دلایل زیر رخ می‌دهد:
+        </p>
+        <ul>
+            <li><strong>🔒 قفل شدن فایل VMDK</strong> توسط یک برنامه‌ی دیگر (مثل VMware که قبلاً باز بوده یا به‌درستی بسته نشده).</li>
+            <li><strong>💥 بسته‌شدن ناگهانی</strong> ویندوز یا هنگ کردن سیستم موقعی که ماشین مجازی در حال اجرا بوده.</li>
+            <li><strong>🧩 وجود فایل‌های .lck</strong> (فایل‌های قفل موقت) که پاک نشده‌اند.</li>
+            <li><strong>🔄 تداخل با آنتی‌ویروس</strong> یا نرم‌افزارهای پشتیبان‌گیری که دیسک را اسکن می‌کنند.</li>
+        </ul>
+        <div class="warning">
+            <strong>💡 نکته:</strong> در این مورد خاص، علت اصلی <strong>بسته‌شدن ناصحیح VMware</strong> در جلسه‌ی قبلی بود که باعث شد فایل قفل روی دیسک باقی بماند.
+        </div>
+    </div>
+
+    <!-- بخش ۳: گام‌های عیب‌یابی -->
+    <div class="section">
+        <h2><span class="emoji">🛠️</span> ۳. گام‌های عیب‌یابی</h2>
+
+        <div class="step">
+            <div class="step-num">۱</div>
+            <div class="step-content">
+                <p><strong>راه‌اندازی مجدد VMware</strong> — کل برنامه را بستم و دوباره اجرا کردم، اما خطا تکرار شد.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-num">۲</div>
+            <div class="step-content">
+                <p><strong>بستن پروسس‌های VMware</strong> — از Task Manager رفتم به تب Details و تمام پروسس‌های <code>vmware-vmx.exe</code> و <code>vmware.exe</code> را End Task کردم، اما باز هم خطا persisted.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-num">۳</div>
+            <div class="step-content">
+                <p><strong>ری‌استارت کامل ویندوز</strong> — سیستم را یک بار ری‌استارت کردم تا تمام قفل‌های سیستمی آزاد شوند.</p>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-num">۴</div>
+            <div class="step-content">
+                <p><strong>✅ راه‌حل نهایی</strong> — به پوشه‌ی <code>D:\Kalilinux\</code> رفتم و تمام فایل‌های با پسوند <code>.lck</code> را پیدا کرده و حذف کردم.</p>
+                <div class="code-box">
+<span>فایل‌های حذف شده:</span>
+Debian 10.x-1-000001.vmdk.lck
+Debian 10.x-000001.vmdk.lck
+                </div>
+                <p>سپس VMware را باز کردم و ماشین مجازی بدون هیچ خطایی استارت خورد.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش ۴: راه‌حل نهایی -->
+    <div class="section">
+        <h2><span class="emoji">✅</span> ۴. راه‌حل نهایی (موفقیت‌آمیز)</h2>
+        <div class="success">
+            <strong>✔️ حذف فایل‌های .lck</strong> — این کار تمام قفل‌های باقی‌مانده روی دیسک را آزاد کرد و ماشین مجازی به‌درستی استارت خورد.
+        </div>
+        <p>
+            بعد از این کار، کالی لینوکس بدون مشکل بالا آمد و من توانستم به محیط کاری خود بازگردم.
+        </p>
+    </div>
+
+    <!-- بخش ۵: نکات پیشگیرانه -->
+    <div class="section">
+        <h2><span class="emoji">📌</span> ۵. نکات پیشگیرانه برای جلوگیری از تکرار</h2>
+        <ul>
+            <li>همیشه ماشین مجازی را با گزینه‌ی <strong>Shut Down Guest</strong> یا <strong>Power Off</strong> خاموش کن، نه با بستن ناگهانی VMware.</li>
+            <li>قبل از خاموش کردن ویندوز، حتماً VMware را به‌درستی ببند.</li>
+            <li>اگر خطا تکرار شد، اول فایل‌های <code>.lck</code> را چک کن و پاک کن.</li>
+            <li>از قرار دادن ماشین مجازی روی درایوهای <strong>Network</strong> یا <strong>External</strong> که ممکن است قطع شوند، خودداری کن.</li>
+        </ul>
+    </div>
+
+    <!-- بخش ۶: جمع‌بندی -->
+    <div class="section">
+        <h2><span class="emoji">📝</span> ۶. جمع‌بندی</h2>
+        <p>
+            مشکل قفل شدن دیسک در VMware یکی از رایج‌ترین خطاهای کاربران است که با <strong>حذف فایل‌های .lck</strong> به‌راحتی حل می‌شود. 
+            در این مورد، پس از طی مراحل عیب‌یابی، ماشین مجازی با موفقیت روشن شد و محیط کاری من بدون از دست دادن داده‌ها بازیابی گردید.
+        </p>
+        <p style="margin-top: 12px;">
+            <strong>🔑 درس آموخته:</strong> همیشه قبل از بستن VMware، مطمئن شو که ماشین مجازی به‌درستی خاموش شده است تا از بروز این خطاها جلوگیری شود.
+        </p>
+    </div>
+
+    <!-- فوتر -->
+    <div class="footer">
+        تهیه‌شده توسط <strong>مریم</strong> — در مسیر یادگیری هک و امنیت وب 💻🔥
+        <br>
+        <span style="font-size:13px; color:#6e7681;">این گزارش برای مستندسازی فرآیند عیب‌یابی و حل مشکل تهیه شده است.</span>
+    </div>
+
+</div>
+
+</body>
+</html>

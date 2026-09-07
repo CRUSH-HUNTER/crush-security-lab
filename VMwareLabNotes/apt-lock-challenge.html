@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>چالش قفل APT — تشخیص و رفع</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#0b0d10;
+  --bg-panel:#12151a;
+  --bg-deep:#07090d;
+  --line:#262b33;
+  --text:#d7dbe0;
+  --text-dim:#838d99;
+  --red:#ff4d4f;
+  --red-dim:#7a2426;
+  --green:#3fd68a;
+  --blue:#5aa9ff;
+  --amber:#ffb454;
+  --purple:#b784ff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);scroll-behavior:smooth;}
+body{
+  font-family:'Vazirmatn',sans-serif;
+  color:var(--text);
+  line-height:1.9;
+  padding-bottom:80px;
+}
+
+.hero{
+  padding:56px 24px 40px;
+  max-width:900px;
+  margin:0 auto;
+  border-bottom:1px solid var(--line);
+}
+.hero-tag{
+  font-family:'JetBrains Mono',monospace;
+  direction:ltr;
+  display:inline-block;
+  color:var(--red);
+  font-size:12px;
+  letter-spacing:1.5px;
+  border:1px solid var(--red-dim);
+  background:rgba(255,77,79,0.07);
+  padding:4px 12px;
+  border-radius:4px;
+  margin-bottom:18px;
+}
+.hero h1{font-size:30px;font-weight:800;color:#fff;margin-bottom:10px;}
+.hero p{color:var(--text-dim);font-size:15.5px;max-width:680px;}
+
+main{max-width:900px;margin:0 auto;padding:0 24px;}
+
+.section{margin-top:52px;}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.section-num{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;flex-shrink:0;
+}
+.n-red{background:rgba(255,77,79,0.12);border:1px solid var(--red-dim);color:var(--red);}
+.n-amber{background:rgba(255,180,84,0.12);border:1px solid rgba(255,180,84,0.3);color:var(--amber);}
+.n-blue{background:rgba(90,169,255,0.12);border:1px solid rgba(90,169,255,0.3);color:var(--blue);}
+.n-green{background:rgba(63,214,138,0.12);border:1px solid rgba(63,214,138,0.3);color:var(--green);}
+.n-purple{background:rgba(183,132,255,0.12);border:1px solid rgba(183,132,255,0.3);color:var(--purple);}
+
+.section-head h2{font-size:19px;font-weight:700;color:#fff;}
+.section-head .en{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  color:var(--text-dim);font-size:12px;display:block;margin-top:2px;
+}
+
+.block{
+  background:var(--bg-panel);border:1px solid var(--line);
+  border-radius:10px;padding:18px 22px;margin-bottom:14px;
+}
+.block h3{font-size:14.5px;font-weight:700;color:#fff;margin-bottom:10px;}
+.block p{font-size:15px;}
+
+pre{
+  font-family:'JetBrains Mono',monospace;direction:ltr;unicode-bidi:isolate;
+  background:var(--bg-deep);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;font-size:13px;
+  line-height:1.75;margin:10px 0 0;white-space:pre-wrap;word-break:break-all;
+}
+pre.green{color:#a8f5c8;}
+pre.red{color:#ffa8a8;}
+pre.amber{color:#ffd9a0;}
+pre.blue{color:#a8d4ff;}
+pre.dim{color:#6b7280;}
+
+code.inline{
+  font-family:'JetBrains Mono',monospace;direction:ltr;unicode-bidi:isolate;
+  background:rgba(255,255,255,0.07);padding:1px 6px;border-radius:4px;font-size:0.91em;
+}
+
+.callout{border-radius:8px;padding:13px 16px;margin-top:12px;font-size:14.5px;line-height:1.75;}
+.callout.green{background:linear-gradient(135deg,rgba(63,214,138,0.10),rgba(63,214,138,0.02));border:1px solid rgba(63,214,138,0.3);color:#c7f5da;}
+.callout.blue{background:linear-gradient(135deg,rgba(90,169,255,0.10),rgba(90,169,255,0.02));border:1px solid rgba(90,169,255,0.3);color:#cfe6ff;}
+.callout.amber{background:linear-gradient(135deg,rgba(255,180,84,0.10),rgba(255,180,84,0.02));border:1px solid rgba(255,180,84,0.35);color:#ffdca8;}
+.callout.red{background:linear-gradient(135deg,rgba(255,77,79,0.10),rgba(255,77,79,0.02));border:1px solid var(--red-dim);color:#ffc0c0;}
+.callout b{font-weight:700;}
+
+hr.div{border:none;border-top:1px dashed var(--line);margin:52px 0 0;}
+
+/* STEP CARD */
+.steps{margin-top:12px;}
+.step{
+  display:flex;gap:16px;
+  padding:14px 0;
+  border-bottom:1px solid var(--line);
+}
+.step:last-child{border-bottom:none;}
+.step-num{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  width:28px;height:28px;border-radius:6px;
+  background:rgba(63,214,138,0.12);border:1px solid rgba(63,214,138,0.3);
+  color:var(--green);font-weight:800;font-size:13px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  margin-top:2px;
+}
+.step-content h4{font-size:14.5px;font-weight:700;color:#fff;margin-bottom:6px;}
+.step-content p{font-size:14px;color:var(--text);}
+
+/* ERROR BOX */
+.error-box{
+  background:rgba(255,77,79,0.05);
+  border:1px solid var(--red-dim);
+  border-radius:10px;
+  padding:16px 20px;
+  margin-bottom:14px;
+}
+.error-box .error-tag{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-size:11px;font-weight:700;
+  color:var(--red);letter-spacing:1px;
+  display:block;margin-bottom:8px;
+}
+.error-box h4{font-size:14.5px;font-weight:700;color:#fff;margin-bottom:8px;}
+.error-box p{font-size:14px;}
+
+/* CAUSE-FIX GRID */
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+.cf-box{background:var(--bg-deep);border:1px solid var(--line);border-radius:8px;padding:14px 16px;}
+.cf-box h5{font-size:13px;font-weight:700;margin-bottom:8px;}
+.cf-box.cause h5{color:var(--red);}
+.cf-box.fix h5{color:var(--green);}
+.cf-box p{font-size:13.5px;color:var(--text-dim);}
+
+/* QUICK REF */
+.quick-ref{
+  background:var(--bg-deep);border:1px solid rgba(90,169,255,0.2);
+  border-radius:10px;padding:20px 22px;margin-top:14px;
+}
+.quick-ref h3{font-size:15px;font-weight:700;color:var(--blue);margin-bottom:14px;}
+.qr-item{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:8px 0;border-bottom:1px solid var(--line);
+}
+.qr-item:last-child{border-bottom:none;}
+.qr-label{
+  font-size:12px;color:var(--text-dim);
+  min-width:120px;padding-top:3px;flex-shrink:0;
+}
+.qr-cmd{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-size:12.5px;color:var(--green);word-break:break-all;
+}
+
+/* TIMELINE */
+.incident{
+  background:var(--bg-panel);border:1px solid var(--line);
+  border-radius:10px;padding:18px 22px;margin-bottom:14px;
+}
+.incident-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.incident-badge{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+}
+.ib-red{background:rgba(255,77,79,0.12);color:var(--red);border:1px solid var(--red-dim);}
+.ib-green{background:rgba(63,214,138,0.12);color:var(--green);border:1px solid rgba(63,214,138,0.3);}
+.ib-amber{background:rgba(255,180,84,0.12);color:var(--amber);border:1px solid rgba(255,180,84,0.3);}
+.incident-head h4{font-size:15px;font-weight:700;color:#fff;}
+
+footer{
+  max-width:900px;margin:60px auto 0;padding:20px 24px 0;
+  border-top:1px solid var(--line);color:var(--text-dim);font-size:13px;text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-tag">// TROUBLESHOOTING · Linux Package Manager</span>
+  <h1>چالش قفل APT — تشخیص، دلیل، و رفع کامل</h1>
+  <p>مستندسازی کامل مشکل <code style="font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,0.07);padding:1px 6px;border-radius:4px;">Could not get lock /var/lib/dpkg/lock</code> که در حین نصب ابزارها روی Kali Linux رخ داد — با دلایل دقیق و روش رفع قدم‌به‌قدم.</p>
+</div>
+
+<main>
+
+<!-- ─── 1. خطاها ─── -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-num n-red">1</div>
+    <div>
+      <h2>خطاهایی که دریافت شد</h2>
+      <span class="en">Error Messages Encountered</span>
+    </div>
+  </div>
+
+  <div class="error-box">
+    <span class="error-tag">ERROR #1 — apt lists lock</span>
+    <h4>خطای اول — قفل لیست‌های APT</h4>
+    <pre class="red">
+sudo apt update
+Error: Could not get lock /var/lib/apt/lists/lock. It is held by process 100256 (apt)
+Notice: Be aware that removing the lock file is not a solution and may break your system.
+Error: Unable to lock directory /var/lib/apt/lists/</pre>
+  </div>
+
+  <div class="error-box">
+    <span class="error-tag">ERROR #2 — dpkg lock</span>
+    <h4>خطای دوم — قفل dpkg (هنگام نصب git)</h4>
+    <pre class="red">
+sudo apt install git -y
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock. It is held by process 106123 (apt)</pre>
+  </div>
+
+  <div class="error-box">
+    <span class="error-tag">ERROR #3 — dpkg lock-frontend</span>
+    <h4>خطای سوم — قفل frontend (هنگام نصب sqlitebrowser)</h4>
+    <pre class="red">
+sudo apt install sqlitebrowser -y
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend.
+It is held by process 110724 (apt)</pre>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ─── 2. چرا ─── -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-num n-amber">2</div>
+    <div>
+      <h2>چرا این اتفاق می‌افته؟</h2>
+      <span class="en">Root Cause Analysis</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>مکانیزم قفل در APT/dpkg</h3>
+    <p>لینوکس برای جلوگیری از تداخل بین چند نصب همزمان، از فایل‌های قفل (lock file) استفاده می‌کنه. وقتی یه پروسه‌ی <code class="inline">apt</code> داره اجرا می‌شه، این فایل‌ها رو می‌گیره و هیچ <code class="inline">apt</code> دیگه‌ای نمی‌تونه اجرا بشه:</p>
+    <pre class="amber">
+/var/lib/apt/lists/lock       ← قفل لیست پکیج‌ها (هنگام apt update)
+/var/lib/dpkg/lock            ← قفل دیتابیس dpkg
+/var/lib/dpkg/lock-frontend   ← قفل رابط dpkg
+/var/cache/apt/archives/lock  ← قفل کش دانلودها</pre>
+  </div>
+
+  <div class="block">
+    <h3>علت‌های رایج ایجاد قفل معلق</h3>
+    <div class="cf-grid">
+      <div class="cf-box cause">
+        <h5>علت ۱ — Ctrl+Z اشتباه</h5>
+        <p>زدن <code class="inline">Ctrl+Z</code> پروسه رو pause می‌کنه (نه kill) — قفل هنوز گرفته‌ست.</p>
+      </div>
+      <div class="cf-box cause">
+        <h5>علت ۲ — بسته شدن ترمینال</h5>
+        <p>اگه ترمینال وسط نصب بسته بشه، پروسه ممکنه orphan بمونه.</p>
+      </div>
+      <div class="cf-box cause">
+        <h5>علت ۳ — آپدیت خودکار پس‌زمینه</h5>
+        <p>سرویس <code class="inline">unattended-upgrades</code> در پس‌زمینه داره آپدیت می‌کنه.</p>
+      </div>
+      <div class="cf-box cause">
+        <h5>علت ۴ — crash ناگهانی</h5>
+        <p>قطع برق یا crash سیستم وسط نصب → فایل قفل پاک نشده.</p>
+      </div>
+    </div>
+    <div class="callout amber" style="margin-top:12px;">
+      <b>در این جلسه:</b> دستور <code class="inline">apt install sqlitebrowser</code> با <code class="inline">Ctrl+Z</code> پس‌زمینه رفت و به‌صورت پروسه‌ی <b>Stopped (T)</b> معلق موند — قفل dpkg رو نگه داشت و هر <code class="inline">apt</code> بعدی بلاک شد.
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>تشخیص — پیدا کردن پروسه‌ی مقصر</h3>
+    <p>این دستور نشون می‌ده کدوم پروسه داره از apt استفاده می‌کنه:</p>
+    <pre class="blue">
+ps aux | grep apt</pre>
+    <p style="margin-top:10px;">خروجی در این جلسه:</p>
+    <pre class="amber">
+mary   110724  pts/9   T+   0:03  apt install sqlitebrowser -y
+#                              ↑
+#                         T = Stopped (pause شده با Ctrl+Z)</pre>
+    <p style="margin-top:10px;">وضعیت <code class="inline">T</code> در ستون STATUS یعنی پروسه pause شده — نه تموم شده، نه در حال اجرا. هنوز قفل رو گرفته.</p>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ─── 3. رفع ─── -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-num n-green">3</div>
+    <div>
+      <h2>رفع کامل — قدم‌به‌قدم</h2>
+      <span class="en">Complete Fix — Step by Step</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>پیدا کردن PID پروسه‌ی مقصر</h4>
+          <p>از خروجی <code class="inline">ps aux | grep apt</code> یا مستقیم از پیام خطا، عدد PID رو پیدا کن (مثلاً <code class="inline">110724</code>).</p>
+          <pre class="blue">
+ps aux | grep apt</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>کشتن پروسه‌ی مقصر</h4>
+          <p>با <code class="inline">-9</code> (SIGKILL) مطمئن می‌شیم پروسه واقعاً کشته می‌شه و نه فقط pause:</p>
+          <pre class="blue">
+sudo kill -9 110724</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>پاک کردن تمام فایل‌های قفل</h4>
+          <p>بعد از کشتن پروسه، فایل‌های قفل باقی‌مانده رو پاک کن:</p>
+          <pre class="blue">
+sudo rm -f /var/lib/dpkg/lock
+sudo rm -f /var/lib/dpkg/lock-frontend
+sudo rm -f /var/lib/apt/lists/lock
+sudo rm -f /var/cache/apt/archives/lock</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>تعمیر dpkg</h4>
+          <p>اگه نصب ناتموم مونده باشه، این دستور وضعیت dpkg رو به حالت سالم برمی‌گردونه:</p>
+          <pre class="blue">
+sudo dpkg --configure -a</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h4>اجرای دوباره‌ی دستور اصلی</h4>
+          <p>حالا می‌تونی هر دستور <code class="inline">apt</code> رو بزنی:</p>
+          <pre class="green">
+sudo apt update
+sudo apt install git -y
+# یا هر پکیج دیگه‌ای</pre>
+        </div>
+      </div>
+
+    </div>
+    <div class="callout green">
+      <b>نکته مهم:</b> هیچ‌وقت فایل‌های قفل رو <b>بدون کشتن پروسه‌ی مقصر</b> پاک نکن — ممکنه دیتابیس dpkg خراب بشه. همیشه اول <code class="inline">kill</code>، بعد <code class="inline">rm</code>.
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ─── 4. وقایع این جلسه ─── -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-num n-blue">4</div>
+    <div>
+      <h2>وقایع این جلسه — timeline</h2>
+      <span class="en">Session Incident Timeline</span>
+    </div>
+  </div>
+
+  <div class="incident">
+    <div class="incident-head">
+      <span class="incident-badge ib-red">INCIDENT 1</span>
+      <h4>قفل هنگام نصب sqlitebrowser</h4>
+    </div>
+    <p style="font-size:14px;">هنگام نصب <code class="inline">sqlitebrowser</code>، پروسه با <code class="inline">Ctrl+Z</code> pause شد و به حالت Stopped (T) رفت. قفل <code class="inline">/var/lib/dpkg/lock-frontend</code> رو نگه داشت.</p>
+    <pre class="red" style="margin-top:10px;">
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend.
+It is held by process 110724 (apt)</pre>
+  </div>
+
+  <div class="incident">
+    <div class="incident-head">
+      <span class="incident-badge ib-amber">WORKAROUND</span>
+      <h4>دانلود مستقیم با wget (بدون apt)</h4>
+    </div>
+    <p style="font-size:14px;">برای دور زدن مشکل قفل، تلاش شد <code class="inline">dbeaver-ce</code> مستقیم با <code class="inline">wget</code> دانلود بشه — ولی این هم با مشکل DNS مواجه شد:</p>
+    <pre class="red" style="margin-top:10px;">
+wget https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb
+Resolving dbeaver.io... failed: Temporary failure in name resolution.
+# علت: دسترسی مسدود از ایران + VPN فعال نبود روی wget</pre>
+  </div>
+
+  <div class="incident">
+    <div class="incident-head">
+      <span class="incident-badge ib-green">RESOLVED</span>
+      <h4>رفع قفل و نصب موفق sqlitebrowser</h4>
+    </div>
+    <p style="font-size:14px;">با اجرای دستورات به ترتیب صحیح، قفل رفع و <code class="inline">sqlitebrowser</code> با موفقیت نصب شد:</p>
+    <pre class="green" style="margin-top:10px;">
+sudo kill -9 110724
+sudo rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend
+sudo rm -f /var/lib/apt/lists/lock /var/cache/apt/archives/lock
+sudo dpkg --configure -a
+sudo apt update && sudo apt install sqlitebrowser -y
+# ✓ نصب موفق</pre>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- ─── 5. مرجع سریع ─── -->
+<section class="section">
+  <div class="section-head">
+    <div class="section-num n-purple">5</div>
+    <div>
+      <h2>مرجع سریع — دفعه‌ی بعد</h2>
+      <span class="en">Quick Reference Card</span>
+    </div>
+  </div>
+
+  <div class="quick-ref">
+    <h3>// وقتی apt قفل بود — این دستورها رو به ترتیب بزن</h3>
+
+    <div class="qr-item">
+      <span class="qr-label">پیدا کردن PID</span>
+      <span class="qr-cmd">ps aux | grep apt</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-label">کشتن پروسه</span>
+      <span class="qr-cmd">sudo kill -9 &lt;PID&gt;</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-label">پاک کردن قفل dpkg</span>
+      <span class="qr-cmd">sudo rm -f /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-label">پاک کردن قفل apt</span>
+      <span class="qr-cmd">sudo rm -f /var/lib/apt/lists/lock /var/cache/apt/archives/lock</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-label">تعمیر dpkg</span>
+      <span class="qr-cmd">sudo dpkg --configure -a</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-label">آپدیت و نصب</span>
+      <span class="qr-cmd">sudo apt update && sudo apt install &lt;package&gt; -y</span>
+    </div>
+    <div class="qr-item">
+      <span class="qr-label">بررسی وضعیت پروسه</span>
+      <span class="qr-cmd">T = Stopped | R = Running | S = Sleeping | Z = Zombie</span>
+    </div>
+  </div>
+
+  <div class="callout red" style="margin-top:14px;">
+    <b>نکته‌ی مهم برای جلوگیری از تکرار:</b> هیچ‌وقت توی وسط یه <code class="inline">apt install</code> از <code class="inline">Ctrl+Z</code> استفاده نکن. اگه خواستی متوقفش کنی، از <code class="inline">Ctrl+C</code> استفاده کن که پروسه رو کامل kill می‌کنه و قفل آزاد می‌شه.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  یادداشت فنی شخصی — چالش قفل APT · Kali Linux · در حین جلسه‌ی تست امنیتی Juice Shop
+</footer>
+
+</body>
+</html>
