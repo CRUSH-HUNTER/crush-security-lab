@@ -49,7 +49,7 @@ Each research report aims to document the vulnerability, reproduction process, s
 | [TOTP Secret Explained](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/totp-secret-explained.html) | TOTP secrets and how two-factor authentication uses them |
 | [Password Hash Cracking](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/password-hash-cracking.html) | Password hashing concepts and cracking techniques |
 | [Hashcat Errors Report](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/hashcat-errors-report.html) | Practical errors and fixes encountered while using hashcat |
-| [HTTP & URL Reference](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/http-url.html) | Reference notes on HTTP concepts and URL structure |
+| [HTTP - URL Reference](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/http-url.html) | Reference notes on HTTP concepts and URL structure |
 
 ---
 
