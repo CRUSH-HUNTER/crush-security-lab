@@ -6,16 +6,6 @@
 
 ---
 
-## 👋 About
-
-I'm **crush**, an aspiring cybersecurity professional focused on **Web Application Security, penetration testing, and vulnerability research**.
-
-I use intentionally vulnerable applications and isolated laboratory environments to develop practical security skills through hands-on testing, analysis, and technical documentation.
-
-My current focus is understanding **how web vulnerabilities work, how they can be reproduced, what their security impact is, and how they can be mitigated**.
-
----
-
 ## 🎯 Current Focus
 
 - Web Application Security
@@ -46,19 +36,20 @@ My practical research is primarily performed in controlled and intentionally vul
 
 ### Reports in this repository
 
-This repository contains technical write-ups covering topics such as:
+Each research report aims to document the vulnerability, reproduction process, security impact, evidence, and possible remediation.
 
-- SQL Injection
-- Cross-Site Scripting (XSS)
-- IDOR / Broken Access Control
-- JWT Security
-- CSRF
-- Information Disclosure
-- Directory Traversal
-- Authentication vulnerabilities
-- Session security
-
-Each research report aims to document the vulnerability, reproduction process, security impact, evidence, and possible remediation. See the [`WebSecurity/reports`](./WebSecurity/reports) folder for the full list.
+| Report | Topic |
+|---|---|
+| [Full Penetration Test Report](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/full-penetration-test-report.html) | Full SQLi walkthrough — authentication bypass on the Bender account |
+| [SQL Injection](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/sql-injection.html) | Admin login bypass and password hash extraction via SQLi |
+| [XSS Session Hijacking](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/xss_session_hijacking.html) | Stealing a user session via XSS and cookie theft |
+| [JWT Deep Dive](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/jwt_deep_dive.html) | JWT structure, payload decoding, and hands-on token testing |
+| [Security Test Findings](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/security-test-findings.html) | CSRF, Information Disclosure, IDOR, Clickjacking, Directory Traversal, JWT `alg: none` bypass |
+| [Juice Shop Findings (Public)](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/juice_shop_findings_public.html) | Condensed summary of the Juice Shop findings |
+| [TOTP Secret Explained](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/totp-secret-explained.html) | TOTP secrets and how two-factor authentication uses them |
+| [Password Hash Cracking](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/password-hash-cracking.html) | Password hashing concepts and cracking techniques |
+| [Hashcat Errors Report](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/hashcat-errors-report.html) | Practical errors and fixes encountered while using hashcat |
+| [HTTP & URL Reference](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/http%26url.html) | Reference notes on HTTP concepts and URL structure |
 
 ---
 
