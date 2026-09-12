@@ -50,7 +50,7 @@ Each research report aims to document the vulnerability, reproduction process, s
 | [Password Hash Cracking](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/password-hash-cracking.html) | Password hashing concepts and cracking techniques |
 | [Hashcat Errors Report](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/hashcat-errors-report.html) | Practical errors and fixes encountered while using hashcat |
 | [HTTP - URL Reference](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/http-url.html) | Reference notes on HTTP concepts and URL structure |
-
+| [Manipulatin_Database Reference](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/Manipulatin_Database.html) | Reference notes on Manipulating Database |
 
 ---
 
