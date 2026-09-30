@@ -1,0 +1,29 @@
+# CVE-2026-94545 — Next.js ImageResponse RCE
+
+> **Severity:** 🔴 Critical — CVSS 9.5
+> **Affected:** Next.js 16.2.0 – 16.3.5 (Node.js runtime, `sharp` installed)
+> **Patched:** Next.js 16.3.6
+> **Published:** September 24, 2026
+
+## 📄 Full Report
+
+👉 **[Read the full analysis (HTML)](./CVE-2026-94545-nextjs-imageresponse-rce.html)**
+
+## ⚡ TL;DR
+
+CVE-2026-94545 is a critical remote code execution vulnerability in the
+Node.js implementation of `ImageResponse` from `next/og`. Attacker-controlled
+values rendered into SVG content can escape Satori's sanitization and reach
+native XML parsers via `sharp`, leading to memory corruption and RCE.
+
+## 🎯 Affected Conditions (all must be true)
+
+- Next.js `>=16.2.0 <16.3.6`
+- Running on **Node.js runtime** (not Edge)
+- `sharp` package installed
+- Attacker-controlled input flows into generated SVG
+
+## 🛡️ Remediation
+
+```bash
+npm install next@16.3.6
