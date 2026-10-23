@@ -1,6 +1,6 @@
 # CRLF Injection — Lab Practice Report
 
-> **Author:** Mary (Security Researcher)
+> **Author:** CRUSH (Security Researcher)
 > **Date:** 2026-10-23
 > **Environment:** Local isolated lab (127.0.0.1)
 > **Scope:** Self-built vulnerable server (educational purpose only)
@@ -124,21 +124,19 @@ Impact: The attacker has fully terminated the header block and injected an arbit
 Any client that renders the response executes attacker-controlled JavaScript in the origin’s context — a stored/reflected XSS primitive,
 depending on where the URL is used.
 
-
 5. Impact Assessment
-Scenario	Real-World Impact	Severity (CVSS 3.1)
-Header Injection	Malformed responses, cache poisoning	Medium
-Session Fixation	Account takeover (chained)	High
-Response Splitting → XSS	Script execution in victim context, data theft	High–Critical
+
+   Scenario	                         Real-World Impact	                 Severity (CVSS 3.1)
+Header Injection	        Malformed responses, cache poisoning	            Medium
+Session Fixation	             Account takeover (chained)	                     High
+Response Splitting → XSS	Script execution in victim context, data theft	  High–Critical
+
 
 In a production target, CRLF injection into a redirect endpoint often chains into:
 
     Cache Poisoning: attacker poisons a shared cache with a malicious response.
-
     XSS via Response Splitting: persistent script execution for any user who visits the poisoned URL.
-
     Session Hijacking: cookie injection + weak session logic = ATO.
-
 
 6. Root Cause
 The vulnerability exists because the application reflects user input into an HTTP header without sanitizing CR/LF characters.
@@ -152,7 +150,6 @@ python
 
 if _newline_re.search(value) is not None:
     raise ValueError("Header values must not contain newline characters.")
-
 
 
 7. Remediation
