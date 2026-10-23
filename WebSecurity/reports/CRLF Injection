@@ -1,0 +1,46 @@
+# CRLF Injection Lab - Practice Report
+
+## Summary
+Local Flask/http.server lab demonstrating CRLF injection leading to:
+- Header injection
+- Session fixation via Set-Cookie
+- Response splitting leading to XSS
+
+## Environment
+- Python 3.13
+- http.server (raw, no protection)
+- Endpoint: GET /redirect?url=<payload>
+
+## Vulnerability
+The `url` parameter is placed directly into the `Location` header without sanitization. The server does not filter `\r` or `\n` characters.
+
+## Payloads and Results
+
+### 1. Header Injection
+Payload: `https://example.com%0d%0aX-CRLF-Test:%20Injected`
+Result: New header `X-CRLF-Test: Injected` injected into response.
+
+### 2. Session Fixation
+Payload: `https://example.com%0d%0aSet-Cookie:%20session=malicious`
+Result: Malicious cookie `session=malicious` set in response.
+
+### 3. Response Splitting → XSS
+Payload: `https://example.com%0d%0a%0d%0a<html><body><script>alert(1)</script></body></html>`
+Result: Response body split; attacker-controlled HTML/JS injected.
+
+## Impact
+- Session fixation / cookie manipulation
+- Cache poisoning
+- XSS via response splitting
+- Potential account takeover
+
+## Remediation
+- Reject input containing `\r` or `\n`
+- Use allowlist for redirect URLs
+- Encode output in headers
+- Use modern frameworks (Flask/Werkzeug already protect against this)
+
+## Lessons Learned
+- Modern frameworks (Werkzeug) block CRLF by default
+- Raw servers (http.server) are vulnerable
+- Response splitting is the most dangerous variant
