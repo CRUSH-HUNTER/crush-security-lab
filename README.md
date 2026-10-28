@@ -40,7 +40,7 @@ Each research report aims to document the vulnerability, reproduction process, s
 
 | Report | Topic |
 |---|---|
-| [CRLF Injection](https://crush-hunter.github.io/WebSecurity/reports/CRLF-Injection.md) | Header Injection, Session Fixation, Response Splitting → XSS (with PoC) | 
+| [CRLF Injection](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/CRLF-Injection.md) | Header Injection, Session Fixation, Response Splitting → XSS (with PoC) | 
 | [Full Penetration Test Report](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/full-penetration-test-report.html) | Full SQLi walkthrough — authentication bypass on the Bender account |
 | [SQL Injection](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/sql-injection.html) | Admin login bypass and password hash extraction via SQLi |
 | [XSS Session Hijacking](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/xss_session_hijacking.html) | Stealing a user session via XSS and cookie theft |
