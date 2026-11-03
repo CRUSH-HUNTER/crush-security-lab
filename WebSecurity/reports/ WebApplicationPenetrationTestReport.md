@@ -82,6 +82,8 @@ The following tests were conducted, and the system was found **not vulnerable**:
 
 ---
 
+Evidence: The Last-Modified header of static assets (e.g., fonts) dates back to 2010, indicating that the infrastructure has not been updated for over a decade."
+
 ## 6. Conclusion & Recommendations
 
 The web application's code and business logic are in an acceptable security state, resisting common OWASP attacks. **The primary risk lies in the infrastructure and server layer.**
