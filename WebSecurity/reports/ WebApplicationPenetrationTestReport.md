@@ -1,101 +1,166 @@
-# 📄 Web Application Penetration Test Report (Sanitized)
+# Web Application Penetration Test Report 
 
-**Project Name:** E-Commerce Website Security Assessment (Project X)  
-**Target:** `[REDACTED FOR CONFIDENTIALITY]`  
-**Test Date:** October 2026  
-**Tester:** CRUSH-HUNTER  
-**Classification:** Confidential (Sanitized for Public Portfolio)  
+**Target:** E-Commerce Website Security Assessment (Project X)
+**Date:** November 2026
+**Tester:** CRUSH-HUNTER
+**Methodology:** OWASP Web Security Testing Guide (WSTG)
 
 ---
 
 ## 1. Executive Summary
 
-This report presents the findings of a black-box penetration test conducted on an e-commerce website (target details withheld for confidentiality) with explicit written authorization from the business owner.
+A manual security assessment was performed on `Project X` based on the
+OWASP WSTG framework. The application demonstrated resistance to SQL Injection
+and User Enumeration attacks, protected by input filtering / WAF mechanisms.
+Two low-to-medium severity findings were identified (weak admin panel CAPTCHA
+and missing CSP header), along with one unconfirmed finding (potential XSS in
+the feedback form). Several network services were also found exposed at the
+hosting infrastructure level.
 
-**Overall Conclusion:** The web application demonstrated a **strong defense posture** against common injection vulnerabilities (such as SQL Injection and XSS) and authentication bypass attempts. The implemented Web Application Firewall (WAF) and input filters successfully blocked malicious payloads.
+## 2. Scope & Limitations
 
-**However, two significant security risks (Medium to High severity) were identified at the infrastructure level:**
-1. **Security Misconfiguration:** Several sensitive network services (including the database and FTP) were exposed directly to the internet.
-2. **Vulnerable Components:** The web server stack (Apache/PHP) had not been updated for an extended period.
-
----
-
-## 2. Scope & Methodology
-
-*   **Scope:** Main domain and sub-paths (e.g., `/admin/`, `/products.php`).
-*   **Methodology:** Manual testing based on the **OWASP Web Security Testing Guide (WSTG)**.
-*   **Tools Used:** Burp Suite (Community), Nmap, Browser DevTools.
-*   **Limitations:** Destructive attacks (e.g., DoS), heavy automated scanning, and mass brute-forcing were excluded in accordance with ethical rules and the agreed scope.
-
----
+- **Scope:** Main domain `Project X` and its public pages
+- **Method:** Manual testing with Burp Suite and Nmap
+- **Limitations:** No heavy automated scanning, mass brute-force, or destructive
+  attacks were performed. Admin panel access was out of scope; dependent
+  findings are reported as "unconfirmed."
 
 ## 3. Findings Summary
 
-| # | Vulnerability Name | Severity | Status |
-| :--- | :--- | :--- | :--- |
-| 1 | Exposed Network Services | **High** | ✅ Confirmed |
-| 2 | Outdated Components | **Medium** | ✅ Confirmed |
-| 3 | Weak CAPTCHA Implementation | **Low/Medium** | ✅ Confirmed |
-| 4 | Injection & Auth Bypass Tests | - | ❌ Negative (Secure) |
-
----
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| 1 | Exposed network services (hosting-level) | Medium | Confirmed |
+| 2 | Weak math CAPTCHA on admin panel | Low | Confirmed |
+| 3 | Potential Stored XSS in Feedback form | Informational | Unconfirmed |
+| 4 | Missing Content-Security-Policy header | Low | Confirmed |
+| 5 | SQL Injection in `id` parameter | — | Negative (Safe) |
+| 6 | User Enumeration (login & forgot password) | — | Negative (Safe) |
+| 7 | Information disclosure via 500 error | — | Negative (Safe) |
+| 8 | Directory listing on `/admin/uploads/gallery/` | — | Negative (Safe) |
 
 ## 4. Detailed Findings
 
-### 🔴 Finding 1: Exposed Network Services
+### Finding 1 — Exposed Network Services
+**Severity:** Medium
 
-*   **Severity:** High (CVSS: ~7.5)
-*   **Description:** During network reconnaissance, several sensitive ports were found accessible directly from the internet.
-*   **Evidence:**
-    *   Port **21 (FTP - Pure-FTPd):** Open.
-    *   Port **22 (SSH - OpenSSH 8.0):** Open.
-    *   Port **3306 (MySQL 8.0):** **Open.**
-*   **Impact:** Exposing the database port (3306) allows attackers to perform brute-force attacks directly against the database. Open FTP and SSH ports also significantly increase the attack surface.
-*   **Remediation:** The MySQL database and FTP service must be blocked via firewall and restricted to internal networks or specific admin IPs. SSH access should also be IP-restricted.
+An `Nmap` scan was performed:
 
-### 🟠 Finding 2: Outdated Components
+\`\`\`
+nmap -sV --top-ports 20 dreamskitchen.co.in
+\`\`\`
 
-*   **Severity:** Medium
-*   **Description:** The web server infrastructure (Apache/PHP) and the administrative panel had not been updated for at least 3 years.
-*   **Impact:** Outdated software versions typically contain known vulnerabilities (CVEs) that attackers can exploit (e.g., for Remote Code Execution).
-*   **Remediation:** Immediately update all server components (Apache, PHP, MySQL) to the latest stable versions.
+Results:
 
-### 🟡 Finding 3: Weak CAPTCHA Implementation
+\`\`\`
+21/tcp   open  ftp     Pure-FTPd
+22/tcp   open  ssh     OpenSSH 8.0 (protocol 2.0)
+53/tcp   open  domain
+80/tcp   open  http    Apache httpd
+110/tcp  open  pop3    Dovecot pop3d
+111/tcp  open  rpcbind
+143/tcp  open  imap    Dovecot imapd
+443/tcp  open  ssl/http Apache httpd
+993/tcp  open  ssl/imap Dovecot imapd
+995/tcp  open  ssl/pop3 Dovecot pop3d
+1723/tcp open  tcpwrapped
+3306/tcp open  mysql   MySQL 8.0.46-cll-lve
+\`\`\`
 
-*   **Severity:** Low
-*   **Description:** The admin login page used a simple math CAPTCHA (e.g., `6 - 2 =`).
-*   **Impact:** This type of CAPTCHA is highly vulnerable to automated attacks (e.g., OCR or scripted math solving) and can facilitate brute-force attacks on the admin panel.
-*   **Remediation:** Replace the math CAPTCHA with standard services like Google reCAPTCHA or complex image-based CAPTCHAs.
+The MySQL version string (`cll-lve`) indicates the server is hosted on a
+CloudLinux/cPanel shared hosting environment. This suggests the open ports are
+likely a result of the hosting provider's configuration rather than a direct
+misconfiguration by the site owner.
+
+**Impact:** Direct exposure of MySQL (3306) to the internet increases the
+attack surface and allows direct brute-force attempts against the database.
+FTP and SSH are similarly at risk if weak credentials are used.
+
+**Remediation:** Restrict access to port 3306 to specific IPs or internal
+networks via firewall rules. Follow up with the hosting provider.
+
+### Finding 2 — Weak CAPTCHA on Admin Panel
+**Severity:** Low
+**Location:** `/admin/index.php`
+
+The admin login form uses a simple math CAPTCHA (e.g., "6 − 2 = ?"). The login
+error message ("Invalid username or password") is identical for both invalid
+username and invalid password cases — no user enumeration via this vector.
+
+**Impact:** Simple math CAPTCHAs are trivially solvable by scripts and provide
+no real protection against automated brute-force attacks.
+
+**Remediation:** Replace with reCAPTCHA or an equivalent solution, combined
+with login attempt rate limiting.
+
+### Finding 3 — Potential Stored XSS in Feedback Form
+**Severity:** Informational — Unconfirmed
+**Location:** `/feedback` (fields: `subject`, `message`)
+
+The following payload was submitted:
+
+\`\`\`
+subject=<b>text</b>
+message=<script>Hello</script>
+\`\`\`
+
+Values were accepted without visible filtering or error. The response page
+(`thank-you.php`) does not reflect these values, so Reflected XSS is ruled
+out. Since access to the admin panel (the likely display location for this data)
+was out of scope, Stored XSS could not be confirmed or ruled out.
+
+*P
+
+ositive note:** The form uses randomized anti-CSRF tokens (hashed field
+names).
+
+**Remediation:** Internal review by the team with admin panel access; apply
+output encoding to all displayed user-submitted data.
+
+### Finding 4 — Missing Content-Security-Policy Header
+**Severity:** Low
+
+Response headers lacked a CSP header, though the following were correctly
+configured:
+
+\`\`\`
+Strict-Transport-Security: max-age=31536000
+X-Frame-Options: Deny
+Cache-Control: no-store, no-cache, must-revalidate
+\`\`\`
+
+**Remediation:** Add a Content-Security-Policy header as an additional
+defense layer against XSS.
+
+## 5. Negative Test Results (Verified Safe)
+
+- **SQL Injection:** The `id` parameter in `newsdetail.php` showed no change
+  in Content-Length with a single quote (`id=4'`, both 10346 bytes).
+  Boolean-based payloads (`AND 1=1--`, `AND 1=2--`) were blocked with
+  `400 Bad Request` by input filtering/WAF. Not exploitable.
+- **User Enumeration (Login):** Identical error message for invalid
+  username/password.
+- **User Enumeration (Forgot Password):** Identical message ("Enter correct
+  email id") for valid and invalid emails.
+- **Information Disclosure:** The 500 error page on `/admin/uploads/`
+  contains no technical details (no stack trace, no file paths).
+- **Directory Listing:** `/admin/uploads/gallery/` returns `403 Forbidden`.
+- **phpMyAdmin:** Default path `/phpMyAdmin` not found (`404`).
+
+## 6. Conclusion & Remediation Priorities
+
+The application shows acceptable security posture at the application-logic
+level. The primary risk lies in infrastructure and network service
+configuration.
+
+1. **Urgent:** Restrict MySQL (3306) access via firewall to specific IPs
+2. **Medium:** Internal review of the Feedback form to confirm/rule out Stored XSS
+3. **Low:** Replace math CAPTCHA with reCAPTCHA
+4. **Low:** Add Content-Security-Policy header
 
 ---
 
-## 5. Tests Performed & Negative Results
+*Prepared by CRUSH-HUNTER- — November 2026 — based on the OWASP Web Security
+Testing Guide (WSTG)*
+data) was out of scope, Stored XSS could not be confirmed or ruled out.
 
-The following tests were conducted, and the system was found **not vulnerable**:
-
-*   **SQL Injection:** Parameters (`id`, `cat`) and the admin login form were tested with various payloads (including Time-based `SLEEP`). The WAF and Prepared Statements prevented injection.
-*   **Cross-Site Scripting (XSS):** The contact form and news parameters were tested for Reflected and Stored XSS. Inputs are properly sanitized.
-*   **Host Header Injection:** Modifying the `Host` header in the password reset flow resulted in a `421 Misdirected Request`, indicating proper server configuration.
-*   **Broken Access Control (IDOR):** Access to `/admin/uploads/` and `/phpmyadmin/` was tested and resulted in `403 Forbidden`.
-*   **Clickjacking:** The `X-Frame-Options` header is set to `DENY`.
-*   **User Enumeration:** The password reset form returned identical responses for valid and invalid emails.
-
----
-
-Evidence: The Last-Modified header of static assets (e.g., fonts) dates back to 2010, indicating that the infrastructure has not been updated for over a decade."
-
-## 6. Conclusion & Recommendations
-
-The web application's code and business logic are in an acceptable security state, resisting common OWASP attacks. **The primary risk lies in the infrastructure and server layer.**
-
-**Remediation Priorities:**
-1. **Urgent:** Block port 3306 (MySQL) from public access via firewall.
-2. **Urgent:** Update Apache and PHP to the latest versions.
-3. **Medium:** Replace the math CAPTCHA with a secure alternative.
-4. **Recommended:** Restrict access to FTP and SSH ports.
-
----
-
-## 7. Ethical Disclaimer
-
-All tests documented in this report were conducted with explicit written authorization from the system owner, within the framework of ethical hacking. No data was destroyed, modified, or stolen. The target's identity has been redacted to respect the client's confidentiality.
+**P
