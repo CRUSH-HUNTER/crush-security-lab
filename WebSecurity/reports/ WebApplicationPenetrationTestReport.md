@@ -111,9 +111,7 @@ Values were accepted without visible filtering or error. The response page
 out. Since access to the admin panel (the likely display location for this data)
 was out of scope, Stored XSS could not be confirmed or ruled out.
 
-*P
-
-ositive note:** The form uses randomized anti-CSRF tokens (hashed field
+**Positive note:** The form uses randomized anti-CSRF tokens (hashed field
 names).
 
 **Remediation:** Internal review by the team with admin panel access; apply
