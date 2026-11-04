@@ -163,5 +163,3 @@ configuration.
 *Prepared by CRUSH-HUNTER- — November 2026 — based on the OWASP Web Security
 Testing Guide (WSTG)*
 data) was out of scope, Stored XSS could not be confirmed or ruled out.
-
-**P
