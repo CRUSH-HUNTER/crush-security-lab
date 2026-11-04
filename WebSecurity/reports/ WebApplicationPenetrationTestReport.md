@@ -1,8 +1,11 @@
 # Web Application Penetration Test Report 
 
 **Target:** E-Commerce Website Security Assessment (Project X)
+
 **Date:** November 2026
+
 **Tester:** CRUSH-HUNTER
+
 **Methodology:** OWASP Web Security Testing Guide (WSTG)
 
 ---
