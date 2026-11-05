@@ -117,7 +117,70 @@ names).
 **Remediation:** Internal review by the team with admin panel access; apply
 output encoding to all displayed user-submitted data.
 
-### Finding 4 — Missing Content-Security-Policy Header
+
+## Finding 4 — Open HTTP Methods (PUT / DELETE / PATCH)
+**Severity:** High (Potential — Unconfirmed)
+
+Requests with various HTTP methods against the root domain returned:
+
+\`\`\`
+GET      -> 200
+OPTIONS  -> 200
+PUT      -> 200
+DELETE   -> 200
+PATCH    -> 200
+TRACE    -> 405 Method Not Allowed
+\`\`\`
+
+TRACE is correctly disabled (protection against Cross-Site Tracing). However,
+a `200` response for PUT, DELETE, and PATCH requires deeper investigation: in
+many PHP/mod_rewrite configurations, all requests are routed to a central
+file regardless of method, and a `200` does not necessarily mean the file
+write/delete operation actually executed.
+
+**Testing limitation:** Confirming this definitively (sending a harmless file
+via PUT and reading it back via GET) required explicit client authorization,
+which was **requested and declined**. This check was therefore halted at this
+stage.
+
+**Impact (if actually exploitable):** Worst case, arbitrary file upload or
+deletion on the server (including web shell upload) and potential Remote Code
+Execution. Until confirmed or ruled out, this should be treated as **High**
+risk.
+
+**Remediation:** Disable unnecessary HTTP methods (PUT, DELETE, PATCH, TRACE)
+at the web server configuration level, except where explicitly required.
+Final confirmation of this finding by an internal team with a safe test
+environment is strongly recommended.
+
+## Finding 5 — .env File Present in Public Path
+**Severity:** Informational
+
+A request to `/.env` returned `403 Forbidden` (not `404`), indicating the
+file **exists** on the server but direct access is blocked.
+
+**Impact:** No immediate risk under current configuration, but the file's
+presence in the public web root could lead to sensitive data exposure
+(database credentials, API tokens) if server configuration changes or a
+bypass is discovered.
+
+**Remediation:** Move sensitive configuration files outside the web root
+instead of relying solely on web-server-level blocking rules.
+
+## Additional Negative Results
+- **Clickjacking (active test):** An HTML page with an iframe targeting the
+  site was built; the site failed to load inside the iframe, confirming
+  `X-Frame-Options: Deny` works in practice, not just in theory.
+- **TRACE method:** Blocked with `405 Method Not Allowed`; Cross-Site Tracing
+  risk ruled out.
+
+## Strength — TLS/SSL Configuration
+SSL Labs assessment returned an **A+** rating. The server supports TLS 1.3
+and long-duration HSTS (`max-age=31536000`), with a valid certificate
+(RSA 2048, SHA256) and no weak keys or revocation issues.
+
+
+### Finding 6 — Missing Content-Security-Policy Header
 **Severity:** Low
 
 Response headers lacked a CSP header, though the following were correctly
