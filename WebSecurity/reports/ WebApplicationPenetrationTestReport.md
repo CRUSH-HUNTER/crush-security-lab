@@ -118,7 +118,7 @@ names).
 output encoding to all displayed user-submitted data.
 
 
-## Finding 4 — Open HTTP Methods (PUT / DELETE / PATCH)
+### Finding 4 — Open HTTP Methods (PUT / DELETE / PATCH)
 **Severity:** High (Potential — Unconfirmed)
 
 Requests with various HTTP methods against the root domain returned:
@@ -153,7 +153,7 @@ at the web server configuration level, except where explicitly required.
 Final confirmation of this finding by an internal team with a safe test
 environment is strongly recommended.
 
-## Finding 5 — .env File Present in Public Path
+### Finding 5 — .env File Present in Public Path
 **Severity:** Informational
 
 A request to `/.env` returned `403 Forbidden` (not `404`), indicating the
