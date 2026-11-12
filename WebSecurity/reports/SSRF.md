@@ -6,7 +6,7 @@
 | **Vulnerability** | Server-Side Request Forgery (SSRF) |
 | **Severity** | High |
 | **Date** | November 2026 |
-| **Author** | Maryam Movahed |
+| **Author** | CRUSH-HUNTER |
 
 ## 1. Challenge Description
 
