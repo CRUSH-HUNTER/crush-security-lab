@@ -41,6 +41,7 @@ Each research report aims to document the vulnerability, reproduction process, s
 | Report | Topic |
 |---|---|
 | [Full Penetration Test Report](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/full-penetration-test-report.html) | Full SQLi walkthrough — authentication bypass on the Bender account |
+| [SSRF](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/SSRF.md) | Reverse engineering a malware binary and exploiting the profile upload endpoint to make the server request its own internal API. |
 | [SQL Injection](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/sql-injection.html) | Admin login bypass and password hash extraction via SQLi |
 | [XSS Session Hijacking](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/xss_session_hijacking.html) | Stealing a user session via XSS and cookie theft |
 | [JWT Deep Dive](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/jwt_deep_dive.html) | JWT structure, payload decoding, and hands-on token testing |
