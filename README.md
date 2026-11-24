@@ -1,60 +1,71 @@
+# Maryam Movahhed
 
-# Maryam Movahed
-
-### Cybersecurity Researcher | Web Application & API Security
+### Cybersecurity Researcher | Web Application Security
 
 **Independent Security Research · Vulnerability Analysis · Technical Reporting**
+**Contact:** `@maryantuanet`
 
-I am an independent cybersecurity researcher focused on Web Application and API Security.
+I am an independent cybersecurity researcher focused on web application security. My work involves investigating application behavior, analyzing security weaknesses, validating findings in controlled environments, and documenting technical evidence with practical remediation guidance.
 
-My work involves investigating application behavior, analyzing security weaknesses, validating findings in controlled environments, and documenting technical evidence with practical remediation guidance.
+---
 
-## Research Focus
+## 📌 Start here
 
-- Web Application Security
-- API Security
-- Authentication and Authorization
-- Broken Access Control
-- Injection Vulnerabilities
-- Session Management and JWT Security
+| Report | What it shows |
+|---|---|
+| [Full Penetration Test Report](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/full-penetration-test-report.html) | Full SQL injection walkthrough: authentication bypass, evidence, impact, remediation |
+| [Authorized E-Commerce Assessment (anonymized)](https://github.com/CRUSH-HUNTER/crush-security-lab/blob/main/WebSecurity/reports/WebApplicationPenetrationTestReport.md) | Real-world style report with scope, findings table, severity, and negative results |
+| [Security Test Findings](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/security-test-findings.html) | CSRF, information disclosure, IDOR, clickjacking, directory traversal, JWT `alg: none` |
+| [Juice Shop Findings (Public)](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/juice_shop_findings_public.html) | Condensed summary of all lab findings |
 
-## Research Methodology
+## 🎯 Focus areas
+
+- Web application security
+- Authentication, session management, and JWT security
+- Broken access control (IDOR)
+- Injection vulnerabilities (SQLi, XSS, CRLF)
+- Server-side request forgery (SSRF)
+
+## 🧪 Lab reports (OWASP Juice Shop, local Docker lab)
+
+| Report | Topic |
+|---|---|
+| [SQL Injection](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/sql-injection.html) | Admin login bypass and password hash extraction |
+| [XSS Session Hijacking](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/xss_session_hijacking.html) | Stealing a session via XSS and cookie theft |
+| [JWT Deep Dive](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/jwt_deep_dive.html) | JWT structure, payload decoding, token testing |
+| [JWT Token Forgery](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/JWT_Token_Forgery.html) | Forging tokens and its impact |
+| [SSRF](https://github.com/CRUSH-HUNTER/crush-security-lab/blob/main/WebSecurity/reports/SSRF.md) | Extracting a hidden URL from a binary with `strings`, then abusing the profile image URL endpoint |
+| [CRLF Injection](https://github.com/CRUSH-HUNTER/crush-security-lab/blob/main/WebSecurity/reports/CRLF-Injection.md) | Header injection, session fixation, response splitting to XSS (with PoC) |
+
+## 📰 Security write-ups
+
+| Write-up | Note |
+|---|---|
+| [CVE-2026-94545: Next.js ImageResponse RCE](https://crush-hunter.github.io/crush-security-lab/security-writeups/CVE-2026-94545-nextjs-imageresponse-rce.html) | Analysis of a **publicly disclosed** advisory (credit: Vercel and the original reporters). Not my own discovery. |
+
+## 📓 Study notes
+
+Reference notes written while learning: [`WebSecurity/notes/`](WebSecurity/notes) and [`VMwareLabNotes/`](VMwareLabNotes).
+
+---
+
+## 🔬 Methodology
 
 My research follows an evidence-driven approach:
 
 - Application behavior and attack surface analysis
 - Manual security testing and vulnerability validation
-- Technical evidence collection and analysis
-- Root cause identification
-- Impact assessment
-- Practical remediation recommendations
-- Clear and reproducible technical reporting
+- Technical evidence collection and root cause identification
+- Impact assessment and practical remediation recommendations
+- Clear, reproducible reporting, including negative results (things tested and found safe)
 
-## Research & Technical Documentation
+## 🛠️ Tools
 
-This repository serves as a technical portfolio of my cybersecurity research.
+Burp Suite · Browser DevTools · Nmap · Hashcat · Kali Linux · Docker · VMware Workstation
 
-It contains:
+## ⚠️ Responsible research
 
-- Security testing in controlled lab environments
-- Vulnerability analysis and technical write-ups
-- Web application and API security investigations
-- Research notes and practical experiments
-
-Each published report aims to document the testing scope, methodology, technical evidence, security impact, and recommended remediation.
-
-## Responsible Security Research
-
-All security testing is conducted in controlled environments or against systems for which explicit authorization has been granted.
-
-I follow responsible research practices and prioritize accurate, evidence-based findings over unsupported claims.
-
-## Research Identity
-
-- **Researcher:** Maryam Movahed
-- **Research Lab:** CRUSH-HUNTER
-- **Primary Focus:** Web Application & API Security
-- **Documentation Language:** English
+All testing is conducted in intentionally vulnerable local labs or against systems where I had **explicit written authorization**. Real-world reports are anonymized. Screenshots of cards, wallets, or accounts come from Juice Shop's **fake demo data**. I prioritize accurate, evidence-based findings over unsupported claims. Nothing here should be used against systems you do not own or have permission to test.
 
 ---
 
