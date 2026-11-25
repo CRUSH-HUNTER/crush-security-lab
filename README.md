@@ -1,6 +1,6 @@
-# Maryam Movahhed
+# Maryam Movahed
 
-### Cybersecurity Researcher | Web Application Security
+### Cybersecurity Researcher | Web Application & API Security
 
 **Independent Security Research · Vulnerability Analysis · Technical Reporting**
 **Contact:** `@maryantuanet`
@@ -36,13 +36,6 @@ I am an independent cybersecurity researcher focused on web application security
 | [JWT Token Forgery](https://crush-hunter.github.io/crush-security-lab/WebSecurity/reports/JWT_Token_Forgery.html) | Forging tokens and its impact |
 | [SSRF](https://github.com/CRUSH-HUNTER/crush-security-lab/blob/main/WebSecurity/reports/SSRF.md) | Extracting a hidden URL from a binary with `strings`, then abusing the profile image URL endpoint |
 | [CRLF Injection](https://github.com/CRUSH-HUNTER/crush-security-lab/blob/main/WebSecurity/reports/CRLF-Injection.md) | Header injection, session fixation, response splitting to XSS (with PoC) |
-
-
-## 📓 Study notes
-
-Reference notes written while learning: [`WebSecurity/notes/`](WebSecurity/notes) and [`VMwareLabNotes/`](VMwareLabNotes).
-
----
 
 ## 🔬 Methodology
 
