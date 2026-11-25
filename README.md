@@ -37,11 +37,6 @@ I am an independent cybersecurity researcher focused on web application security
 | [SSRF](https://github.com/CRUSH-HUNTER/crush-security-lab/blob/main/WebSecurity/reports/SSRF.md) | Extracting a hidden URL from a binary with `strings`, then abusing the profile image URL endpoint |
 | [CRLF Injection](https://github.com/CRUSH-HUNTER/crush-security-lab/blob/main/WebSecurity/reports/CRLF-Injection.md) | Header injection, session fixation, response splitting to XSS (with PoC) |
 
-## 📰 Security write-ups
-
-| Write-up | Note |
-|---|---|
-| [CVE-2026-94545: Next.js ImageResponse RCE](https://crush-hunter.github.io/crush-security-lab/security-writeups/CVE-2026-94545-nextjs-imageresponse-rce.html) | Analysis of a **publicly disclosed** advisory (credit: Vercel and the original reporters). Not my own discovery. |
 
 ## 📓 Study notes
 
